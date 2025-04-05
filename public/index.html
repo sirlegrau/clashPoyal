@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tower Defense Game</title>
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<div id="menu-screen">
+  <h1>Tower Defense Game</h1>
+  <button id="play-btn">Play Now</button>
+</div>
+
+<div id="game-container">
+  <canvas id="game-canvas"></canvas>
+
+  <div id="player-health-bar" class="health-bar">
+    <div id="player-health-fill" class="health-fill"></div>
+  </div>
+
+  <div id="opponent-health-bar" class="health-bar">
+    <div id="opponent-health-fill" class="health-fill"></div>
+  </div>
+
+  <div class="card-container">
+    <div class="card" data-index="0">
+      Card 1
+      <div class="card-cooldown"></div>
+    </div>
+    <div class="card" data-index="1">
+      Card 2
+      <div class="card-cooldown"></div>
+    </div>
+    <div class="card" data-index="2">
+      Card 3
+      <div class="card-cooldown"></div>
+    </div>
+  </div>
+
+  <div id="waiting-message">
+    Waiting for opponent...
+  </div>
+</div>
+
+<div id="game-over-screen">
+  <h1 id="result-text">You Win!</h1>
+  <button id="play-again-btn">Play Again</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
