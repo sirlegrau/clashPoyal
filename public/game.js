@@ -21,6 +21,11 @@ const assets = {
     card2: new Image(),
     card3: new Image()
 };
+const troopImages = {
+    soldier: new Image(),
+    archer: new Image(),
+    tank: new Image()
+};
 
 // DOM elements
 const menuScreen = document.getElementById('menu-screen');
@@ -39,11 +44,10 @@ function logDebug(message) {
     console.log(`[DEBUG] ${message}`);
 }
 
-// Load assets
 function loadAssets() {
     return new Promise((resolve) => {
         let loaded = 0;
-        const toLoad = 4; // Updated number of assets to load
+        const toLoad = 7; // 4 original + 3 new troop images
 
         function assetLoaded() {
             loaded++;
@@ -52,7 +56,7 @@ function loadAssets() {
             }
         }
 
-        // Load troop image
+        // Load original assets
         assets.troop.onload = assetLoaded;
         assets.troop.src = 'assets/troop.png';
         assets.troop.onerror = () => {
@@ -60,7 +64,6 @@ function loadAssets() {
             assetLoaded();
         };
 
-        // Load card images
         assets.card1.onload = assetLoaded;
         assets.card1.src = 'assets/card1.png';
         assets.card1.onerror = () => {
@@ -82,6 +85,28 @@ function loadAssets() {
             assetLoaded();
         };
 
+        // Load troop type images
+        troopImages.soldier.onload = assetLoaded;
+        troopImages.soldier.src = 'assets/soldier.png';
+        troopImages.soldier.onerror = () => {
+            console.warn("Failed to load soldier image, using fallback");
+            assetLoaded();
+        };
+
+        troopImages.archer.onload = assetLoaded;
+        troopImages.archer.src = 'assets/archer.png';
+        troopImages.archer.onerror = () => {
+            console.warn("Failed to load archer image, using fallback");
+            assetLoaded();
+        };
+
+        troopImages.tank.onload = assetLoaded;
+        troopImages.tank.src = 'assets/tank.png';
+        troopImages.tank.onerror = () => {
+            console.warn("Failed to load tank image, using fallback");
+            assetLoaded();
+        };
+
         // Set a timeout in case image loading takes too long
         setTimeout(() => {
             if (loaded < toLoad) {
@@ -90,9 +115,7 @@ function loadAssets() {
             }
         }, 3000);
     });
-}
-
-// Resize canvas to fit screen
+}// Resize canvas to fit screen
 function resizeCanvas() {
     canvas.width = gameContainer.clientWidth;
     canvas.height = gameContainer.clientHeight;
@@ -225,12 +248,31 @@ function updateUI() {
     playerHealthFill.style.width = `${playerHealthPercent}%`;
     opponentHealthFill.style.width = `${opponentHealthPercent}%`;
 
-    // Update card cooldowns
+    // Update card cooldowns and add troop type info
     player.cards.forEach((card, index) => {
         if (index < cards.length) {
             const cooldownEl = cards[index].querySelector('.card-cooldown');
             const cooldownPercent = (card.cooldown / 3000) * 100;
             cooldownEl.style.height = `${cooldownPercent}%`;
+
+            // Add or update troop type label
+            let troopLabel = cards[index].querySelector('.troop-type');
+            if (!troopLabel) {
+                troopLabel = document.createElement('div');
+                troopLabel.className = 'troop-type';
+                cards[index].appendChild(troopLabel);
+            }
+
+            // Set troop type info
+            let troopInfo = '';
+            if (card.troopType === 'soldier') {
+                troopInfo = 'Soldier<br>HP: 100 • DMG: 10';
+            } else if (card.troopType === 'archer') {
+                troopInfo = 'Archer<br>HP: 70 • DMG: 12';
+            } else if (card.troopType === 'tank') {
+                troopInfo = 'Tank<br>HP: 250 • DMG: 15';
+            }
+            troopLabel.innerHTML = troopInfo;
 
             // Visual feedback for available cards
             if (card.cooldown === 0) {
@@ -243,7 +285,6 @@ function updateUI() {
         }
     });
 }
-
 function drawGame() {
     if (!ctx || !gameState) return;
 
@@ -290,24 +331,51 @@ function drawGame() {
 
                 const troopX = troop.position.x * scaleX;
                 const troopY = troop.position.y * scaleY;
-                const troopSize = 30 * Math.min(scaleX, scaleY);
+                // Size varies by troop type
+                let troopSize = 30;
+
+                // Adjust size based on troop type
+                if (troop.type === 'tank') {
+                    troopSize = 40;
+                } else if (troop.type === 'archer') {
+                    troopSize = 25;
+                }
+
+                troopSize *= Math.min(scaleX, scaleY);
 
                 if (playerKey === playerId) {
-                    // Draw troop image if loaded, otherwise fallback to circle
-                    if (assets.troop.complete && assets.troop.naturalWidth !== 0) {
-                        ctx.drawImage(assets.troop,
+                    // Draw correct troop image based on type
+                    const troopImg = troop.type && troopImages[troop.type]?.complete ?
+                        troopImages[troop.type] : assets.troop;
+
+                    if (troopImg && troopImg.complete && troopImg.naturalWidth !== 0) {
+                        ctx.drawImage(troopImg,
                             troopX - troopSize / 2,
                             troopY - troopSize / 2,
                             troopSize,
                             troopSize);
                     } else {
-                        ctx.fillStyle = '#2980b9'; // Blue for player troops
+                        // Fallback - color by troop type
+                        if (troop.type === 'tank') {
+                            ctx.fillStyle = '#7f8c8d'; // Gray for tanks
+                        } else if (troop.type === 'archer') {
+                            ctx.fillStyle = '#3498db'; // Light blue for archers
+                        } else {
+                            ctx.fillStyle = '#2980b9'; // Default blue for soldiers
+                        }
                         ctx.beginPath();
                         ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 } else {
-                    ctx.fillStyle = '#c0392b'; // Dark red for opponent troops
+                    // For opponent troops, use different colors based on type
+                    if (troop.type === 'tank') {
+                        ctx.fillStyle = '#cd6155'; // Dark red for tanks
+                    } else if (troop.type === 'archer') {
+                        ctx.fillStyle = '#e67e22'; // Orange for archers
+                    } else {
+                        ctx.fillStyle = '#c0392b'; // Default red for soldiers
+                    }
                     ctx.beginPath();
                     ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
                     ctx.fill();
@@ -323,21 +391,42 @@ function drawGame() {
                 // Draw health bar
                 const healthBarWidth = troopSize;
                 const healthBarHeight = 5 * Math.min(scaleX, scaleY);
-                const healthPercent = troop.health / 100;
+
+                // Get max health based on troop type
+                let maxHealth = 100;
+                if (troop.type === 'tank') maxHealth = 250;
+                if (troop.type === 'archer') maxHealth = 70;
+
+                const healthPercent = troop.health / maxHealth;
 
                 // Background
                 ctx.fillStyle = '#7f8c8d';
                 ctx.fillRect(troopX - healthBarWidth / 2, troopY - troopSize / 2 - healthBarHeight * 2,
                     healthBarWidth, healthBarHeight);
 
-                // Health fill
-                ctx.fillStyle = '#27ae60';
+                // Health fill - color based on health percentage
+                if (healthPercent > 0.7) {
+                    ctx.fillStyle = '#27ae60'; // Green
+                } else if (healthPercent > 0.3) {
+                    ctx.fillStyle = '#f39c12'; // Yellow/Orange
+                } else {
+                    ctx.fillStyle = '#e74c3c'; // Red
+                }
+
                 ctx.fillRect(troopX - healthBarWidth / 2, troopY - troopSize / 2 - healthBarHeight * 2,
                     healthBarWidth * healthPercent, healthBarHeight);
 
                 // Show attack animation
                 if (troop.attacking) {
-                    ctx.strokeStyle = '#f39c12';
+                    // Different attack animation colors based on troop type
+                    if (troop.type === 'tank') {
+                        ctx.strokeStyle = '#e74c3c'; // Red for tank attacks
+                    } else if (troop.type === 'archer') {
+                        ctx.strokeStyle = '#9b59b6'; // Purple for archer attacks
+                    } else {
+                        ctx.strokeStyle = '#f39c12'; // Orange/yellow for soldier attacks
+                    }
+
                     ctx.lineWidth = 2 * Math.min(scaleX, scaleY);
                     ctx.beginPath();
                     ctx.arc(troopX, troopY, troopSize, 0, Math.PI * 2);
@@ -361,6 +450,22 @@ function drawGame() {
         ctx.fillText('OPPONENT', GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 20) * scaleY);
     }
 }
-
+const style = document.createElement('style');
+style.textContent = `
+.troop-type {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 2px;
+    border-radius: 3px;
+}
+`;
+document.head.appendChild(style);
 // Start game
 window.onload = init;

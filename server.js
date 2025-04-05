@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
+const troopConfig = require('./troopConfig');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,10 +13,6 @@ app.use(express.static('public'));
 const GAME_WIDTH = 600;
 const GAME_HEIGHT = 800;
 const BASE_SIZE = 100;
-const TROOP_SPEED = 2;
-const TROOP_ATTACK_RANGE = 50;
-const TROOP_ATTACK_DAMAGE = 10;
-const TROOP_HEALTH = 100;
 const BASE_HEALTH = 500;
 const CARD_COOLDOWN = 3000; // 3 seconds
 
@@ -35,9 +32,9 @@ function createGame(player1Id, player2Id) {
                 baseHealth: BASE_HEALTH,
                 troops: [],
                 cards: [
-                    { id: 'card1', cooldown: 0 },
-                    { id: 'card2', cooldown: 0 },
-                    { id: 'card3', cooldown: 0 }
+                    { id: 'card1', cooldown: 0, troopType: 'soldier' },
+                    { id: 'card2', cooldown: 0, troopType: 'archer' },
+                    { id: 'card3', cooldown: 0, troopType: 'tank' }
                 ]
             },
             [player2Id]: {
@@ -46,9 +43,9 @@ function createGame(player1Id, player2Id) {
                 baseHealth: BASE_HEALTH,
                 troops: [],
                 cards: [
-                    { id: 'card1', cooldown: 0 },
-                    { id: 'card2', cooldown: 0 },
-                    { id: 'card3', cooldown: 0 }
+                    { id: 'card1', cooldown: 0, troopType: 'soldier' },
+                    { id: 'card2', cooldown: 0, troopType: 'archer' },
+                    { id: 'card3', cooldown: 0, troopType: 'tank' }
                 ]
             }
         },
@@ -109,6 +106,8 @@ function startGameLoop(gameId) {
             player.troops.forEach(troop => {
                 if (!troop || !troop.position) return;
 
+                const troopStats = troopConfig.getTroopConfigByTypeId(troop.type);
+
                 // Find closest enemy or enemy base
                 let target = null;
                 let minDistance = Infinity;
@@ -141,19 +140,25 @@ function startGameLoop(gameId) {
                 }
 
                 // Attack or move
-                if (target && minDistance <= TROOP_ATTACK_RANGE) {
+                if (target && minDistance <= troopStats.range) {
                     // Attack
                     troop.attacking = true;
 
-                    if (target.type === 'base') {
-                        opponent.baseHealth -= TROOP_ATTACK_DAMAGE / 10; // Reduced damage to base for balance
-                        if (opponent.baseHealth <= 0) {
-                            endGame(gameId, playerId);
-                        }
-                    } else if (opponent.troops && Array.isArray(opponent.troops)) {
-                        const enemyTroopIndex = opponent.troops.findIndex(t => t && t.id === target.id);
-                        if (enemyTroopIndex !== -1) {
-                            opponent.troops[enemyTroopIndex].health -= TROOP_ATTACK_DAMAGE;
+                    // Check if troop can attack based on attack speed
+                    const now = Date.now();
+                    if (!troop.lastAttackTime || (now - troop.lastAttackTime) >= (1000 / troopStats.attackSpeed)) {
+                        troop.lastAttackTime = now;
+
+                        if (target.type === 'base') {
+                            opponent.baseHealth -= troopStats.attack / 10; // Reduced damage to base for balance
+                            if (opponent.baseHealth <= 0) {
+                                endGame(gameId, playerId);
+                            }
+                        } else if (opponent.troops && Array.isArray(opponent.troops)) {
+                            const enemyTroopIndex = opponent.troops.findIndex(t => t && t.id === target.id);
+                            if (enemyTroopIndex !== -1) {
+                                opponent.troops[enemyTroopIndex].health -= troopStats.attack;
+                            }
                         }
                     }
                 } else {
@@ -183,8 +188,8 @@ function startGameLoop(gameId) {
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance > 0) {
-                        troop.position.x += (dx / distance) * TROOP_SPEED;
-                        troop.position.y += (dy / distance) * TROOP_SPEED;
+                        troop.position.x += (dx / distance) * troopStats.speed;
+                        troop.position.y += (dy / distance) * troopStats.speed;
                     }
                 }
             });
@@ -284,6 +289,10 @@ io.on('connection', (socket) => {
         // Apply cooldown
         card.cooldown = CARD_COOLDOWN;
 
+        // Get troop type from card
+        const troopType = card.troopType;
+        const troopStats = troopConfig.getTroopConfigByTypeId(troopType);
+
         // Spawn a troop near the player's base
         const troopId = `troop_${socket.id}_${Date.now()}`;
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
@@ -296,9 +305,11 @@ io.on('connection', (socket) => {
 
         const newTroop = {
             id: troopId,
+            type: troopType,
             position: spawnPos,
-            health: TROOP_HEALTH,
-            attacking: false
+            health: troopStats.health,
+            attacking: false,
+            lastAttackTime: 0
         };
 
         player.troops.push(newTroop);
