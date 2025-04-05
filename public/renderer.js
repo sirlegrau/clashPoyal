@@ -8,13 +8,6 @@ function updateUI() {
 
     if (!player || !opponent) return;
 
-    // Update health bars
-    const playerHealthPercent = (player.baseHealth / 500) * 100;
-    const opponentHealthPercent = (opponent.baseHealth / 500) * 100;
-
-    playerHealthFill.style.width = `${playerHealthPercent}%`;
-    opponentHealthFill.style.width = `${opponentHealthPercent}%`;
-
     // Update card cooldowns and add troop type info
     player.cards.forEach((card, index) => {
         if (index < cards.length) {
@@ -52,7 +45,6 @@ function updateUI() {
         }
     });
 }
-
 function drawGame() {
     if (!ctx || !gameState) return;
 
@@ -76,8 +68,22 @@ function drawGame() {
     // Draw bases
     for (const playerKey in gameState.players) {
         const player = gameState.players[playerKey];
-        const baseX = player.basePosition.x * scaleX;
-        const baseY = player.basePosition.y * scaleY;
+
+        // Adjust base position for bottom base (player base) to be higher on screen
+        let baseX = player.basePosition.x * scaleX;
+        let baseY = player.basePosition.y * scaleY;
+
+        // If this is the bottom base and player is positioned at bottom, move it higher
+        if (playerPosition === 'bottom' && playerKey === playerId) {
+            // Move the base up by 10% of game height
+            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY);
+        }
+        // If this is the bottom base and player is positioned at top, move opponent's base higher
+        else if (playerPosition !== 'bottom' && playerKey !== playerId) {
+            // Move the base up by 10% of game height
+            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY);
+        }
+
         const baseSize = 100 * Math.min(scaleX, scaleY);
 
         // Draw base with image
@@ -111,18 +117,73 @@ function drawGame() {
             }
         }
 
-        // Draw base border
-        ctx.strokeStyle = '#2c3e50';
-        ctx.lineWidth = 3 * Math.min(scaleX, scaleY);
-        ctx.beginPath();
-        ctx.arc(baseX, baseY, baseSize / 2, 0, Math.PI * 2);
-        ctx.stroke();
+        // Draw health bar for base - INCREASED SIZE
+        const healthBarWidth = baseSize * 1.5; // 1.5x wider than the base (increased from 1.2)
+        const healthBarHeight = 15 * Math.min(scaleX, scaleY); // Increased from 10
+        const healthBarBorderWidth = 3 * Math.min(scaleX, scaleY); // Increased from 2
 
-        // Draw health indicator
+        // Maximum base health (assumed to be 500 based on the updateUI function)
+        const maxBaseHealth = 500;
+        const healthPercent = player.baseHealth / maxBaseHealth;
+
+        // Determine if this is top or bottom base
+        const isTopBase = (playerPosition === 'bottom' && playerKey !== playerId) ||
+            (playerPosition !== 'bottom' && playerKey === playerId);
+
+        // Position health bar BELOW top base or ABOVE bottom base
+        let healthBarY;
+        if (isTopBase) {
+            // Position below top base
+            healthBarY = baseY + baseSize/2 + healthBarHeight;
+        } else {
+            // Position above bottom base
+            healthBarY = baseY - baseSize/2 - healthBarHeight - healthBarBorderWidth * 2;
+        }
+
+        // Draw health bar background (border)
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(
+            baseX - healthBarWidth/2 - healthBarBorderWidth,
+            healthBarY - healthBarBorderWidth,
+            healthBarWidth + healthBarBorderWidth * 2,
+            healthBarHeight + healthBarBorderWidth * 2
+        );
+
+        // Draw health bar background
+        ctx.fillStyle = '#7f8c8d';
+        ctx.fillRect(
+            baseX - healthBarWidth/2,
+            healthBarY,
+            healthBarWidth,
+            healthBarHeight
+        );
+
+        // Health fill - color based on health percentage
+        if (healthPercent > 0.7) {
+            ctx.fillStyle = '#27ae60'; // Green
+        } else if (healthPercent > 0.3) {
+            ctx.fillStyle = '#f39c12'; // Yellow/Orange
+        } else {
+            ctx.fillStyle = '#e74c3c'; // Red
+        }
+
+        ctx.fillRect(
+            baseX - healthBarWidth/2,
+            healthBarY,
+            healthBarWidth * healthPercent,
+            healthBarHeight
+        );
+
+        // Add health text on the bars
         ctx.fillStyle = '#ffffff';
-        ctx.font = `${16 * Math.min(scaleX, scaleY)}px Arial`;
+        ctx.font = `bold ${12 * Math.min(scaleX, scaleY)}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText(Math.ceil(player.baseHealth), baseX, baseY);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(
+            `${player.baseHealth}/${maxBaseHealth}`,
+            baseX,
+            healthBarY + healthBarHeight/2
+        );
 
         // Draw troops
         if (player.troops && Array.isArray(player.troops)) {

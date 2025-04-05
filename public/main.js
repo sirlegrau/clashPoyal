@@ -40,8 +40,6 @@ const playBtn = document.getElementById('play-btn');
 const playAgainBtn = document.getElementById('play-again-btn');
 const waitingMessage = document.getElementById('waiting-message');
 const cards = document.querySelectorAll('.card');
-const playerHealthFill = document.getElementById('player-health-fill');
-const opponentHealthFill = document.getElementById('opponent-health-fill');
 
 // Debug logging
 function logDebug(message) {
