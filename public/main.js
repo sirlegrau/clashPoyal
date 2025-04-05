@@ -123,7 +123,7 @@ function resizeCanvas() {
         const canvas = document.getElementById('game-canvas');
 
         // Set canvas dimensions dynamically based on container size
-        const cardContainerHeight = document.querySelector('.card-container').clientHeight || gameContainer.clientHeight * 0.2;
+        const cardContainerHeight = document.querySelector('.card-container').clientHeight || gameContainer.clientHeight * 0.3;
 
         canvas.width = gameContainer.clientWidth;
         canvas.height = gameContainer.clientHeight - cardContainerHeight;
