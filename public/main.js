@@ -118,11 +118,21 @@ function loadAssets() {
 
 // Resize canvas to fit screen
 function resizeCanvas() {
-    const gameContainer = document.getElementById('game-container');
-    const canvas = document.getElementById('game-canvas');
-    canvas.width = gameContainer.clientWidth;
-    canvas.height = gameContainer.clientHeight * 0.8; // Adjust height for gameplay canvas
-    // Draw game elements with the proper scale
+    function resizeCanvas() {
+        const gameContainer = document.getElementById('game-container');
+        const canvas = document.getElementById('game-canvas');
+
+        // Set canvas dimensions dynamically based on container size
+        const cardContainerHeight = document.querySelector('.card-container').clientHeight || gameContainer.clientHeight * 0.2;
+
+        canvas.width = gameContainer.clientWidth;
+        canvas.height = gameContainer.clientHeight - cardContainerHeight;
+
+        // Redraw game elements with proper scaling
+        if (gameState) {
+            drawGame();
+        }
+    }
     if (gameState) {
         drawGame();
     }
