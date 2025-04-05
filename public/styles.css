@@ -84,6 +84,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     overflow: hidden;
+    margin-bottom: 5%;
 }
 
 .card:hover {
