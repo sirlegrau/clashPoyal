@@ -118,16 +118,14 @@ function loadAssets() {
 
 // Resize canvas to fit screen
 function resizeCanvas() {
-    const gameContainer = document.getElementById('game-container');
-    const canvas = document.getElementById('game-canvas');
     canvas.width = gameContainer.clientWidth;
-    canvas.height = gameContainer.clientHeight * 0.8; // Adjust height for gameplay canvas
+    canvas.height = gameContainer.clientHeight;
+
     // Draw game elements with the proper scale
     if (gameState) {
         drawGame();
     }
 }
-window.addEventListener('resize', resizeCanvas);
 
 // Initialize event listeners and UI
 function setupUI() {
