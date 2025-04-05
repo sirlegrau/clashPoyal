@@ -84,7 +84,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     overflow: hidden;
-    margin-bottom: 7%;
+    margin-bottom: 5%;
 }
 
 .card:hover {
@@ -202,7 +202,7 @@ button:hover {
     .card {
         width: 80px;
         height: 120px;
-        margin-bottom: 12%;
+        margin-bottom: 10%;
     }
 
     .health-bar {
