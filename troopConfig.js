@@ -8,7 +8,7 @@ const troopTypes = {
         health: 100,
         attack: 10,
         range: 50,
-        speed: 2,
+        speed: 15,
         attackSpeed: 1, // attacks per second
         cost: 1,        // energy cost
         imageUrl: 'assets/soldier.png',
@@ -21,7 +21,7 @@ const troopTypes = {
         health: 250,
         attack: 15,
         range: 40,
-        speed: 1,
+        speed: 3,
         attackSpeed: 0.7, // slower attack
         cost: 3,
         imageUrl: 'assets/tank.png',
@@ -34,8 +34,8 @@ const troopTypes = {
         health: 70,
         attack: 12,
         range: 350,
-        speed: 1.8,
-        attackSpeed: 1.2,
+        speed: 4,
+        attackSpeed: 3,
         cost: 2,
         imageUrl: 'assets/archer.png',
         description: 'Ranged unit with high attack range'

@@ -11,6 +11,7 @@ body {
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 /* Menu Screen */
@@ -32,48 +33,47 @@ body {
     margin-bottom: 2rem;
 }
 
-/* Game Container */
 #game-container {
     position: relative;
     width: 100%;
     height: 100vh;
-    display: none;
+    display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-/* Canvas positioned at the top portion */
+/* Canvas takes up all space except for the card area */
 #game-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 80%; /* Canvas takes up 80% of the height */
+    height: calc(100% - 140px); /* Space for cards */
     background-color: #ecf0f1;
     z-index: 1;
 }
 
-/* Card Container positioned at the bottom */
+/* Card Container fixed to bottom */
 .card-container {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 20%; /* Cards take up 20% of the height */
+    height: 140px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
     background-color: #34495e;
     padding: 10px;
-    z-index: 2;
+    z-index: 10; /* Ensure cards are above everything */
 }
 
-/* Card Styles */
+/* Card Styles - Made bigger */
 .card {
     position: relative;
-    width: 100px;
-    height: 140px;
+    width: 110px;
+    height: 120px;
     background-color: #3498db;
     border-radius: 10px;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
@@ -94,8 +94,8 @@ body {
 }
 
 .card-image {
-    width: 80%;
-    height: 60%;
+    width: 85%;
+    height: 65%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -131,7 +131,7 @@ body {
 }
 
 #player-health-bar {
-    bottom: 22%; /* Position just above the card container */
+    bottom: 150px; /* Position just above the card container */
     left: 20px;
 }
 
@@ -159,7 +159,7 @@ body {
     border-radius: 10px;
     font-size: 1.5rem;
     display: none;
-    z-index: 10;
+    z-index: 20;
 }
 
 /* Game Over Screen */
@@ -201,8 +201,8 @@ button:hover {
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .card {
-        width: 80px;
-        height: 120px;
+        width: 90px;
+        height: 100px;
     }
 
     .health-bar {
@@ -211,6 +211,7 @@ button:hover {
     }
 
     #player-health-bar {
+        bottom: 150px; /* Keep fixed distance from bottom */
         left: 10px;
     }
 
@@ -220,15 +221,40 @@ button:hover {
 }
 
 @media (max-height: 600px) {
-    #game-canvas {
-        height: 75%;
+    .card-container {
+        height: 120px;
     }
 
-    .card-container {
-        height: 25%;
+    #game-canvas {
+        height: calc(100% - 120px);
+    }
+
+    .card {
+        width: 80px;
+        height: 90px;
     }
 
     #player-health-bar {
-        bottom: 27%;
+        bottom: 130px;
+    }
+}
+
+/* Extra small screens */
+@media (max-height: 450px) {
+    .card-container {
+        height: 100px;
+    }
+
+    #game-canvas {
+        height: calc(100% - 100px);
+    }
+
+    .card {
+        width: 70px;
+        height: 80px;
+    }
+
+    #player-health-bar {
+        bottom: 110px;
     }
 }

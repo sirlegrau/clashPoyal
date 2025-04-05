@@ -16,12 +16,17 @@ const assets = {
     troop: new Image(),
     card1: new Image(),
     card2: new Image(),
-    card3: new Image()
+    card3: new Image(),
+    playerBase: new Image(),
+    opponentBase: new Image()
 };
 const troopImages = {
     soldier: new Image(),
     archer: new Image(),
-    tank: new Image()
+    tank: new Image(),
+    enemySoldier: new Image(),
+    enemyArcher: new Image(),
+    enemyTank: new Image()
 };
 
 // DOM elements
@@ -46,7 +51,7 @@ function logDebug(message) {
 function loadAssets() {
     return new Promise((resolve) => {
         let loaded = 0;
-        const toLoad = 7; // 4 original + 3 new troop images
+        const toLoad = 11; // 4 original + 3 troop images + 2 base images + 2 enemy troop images
 
         function assetLoaded() {
             loaded++;
@@ -106,6 +111,43 @@ function loadAssets() {
             assetLoaded();
         };
 
+        // Load enemy troop images (same assets, but separate instances for potential tinting)
+        troopImages.enemySoldier.onload = assetLoaded;
+        troopImages.enemySoldier.src = 'assets/soldier.png';
+        troopImages.enemySoldier.onerror = () => {
+            console.warn("Failed to load enemy soldier image, using fallback");
+            assetLoaded();
+        };
+
+        troopImages.enemyArcher.onload = assetLoaded;
+        troopImages.enemyArcher.src = 'assets/archer.png';
+        troopImages.enemyArcher.onerror = () => {
+            console.warn("Failed to load enemy archer image, using fallback");
+            assetLoaded();
+        };
+
+        troopImages.enemyTank.onload = assetLoaded;
+        troopImages.enemyTank.src = 'assets/tank.png';
+        troopImages.enemyTank.onerror = () => {
+            console.warn("Failed to load enemy tank image, using fallback");
+            assetLoaded();
+        };
+
+        // Load base images
+        assets.playerBase.onload = assetLoaded;
+        assets.playerBase.src = 'assets/player-base.png';
+        assets.playerBase.onerror = () => {
+            console.warn("Failed to load player base image, using fallback");
+            assetLoaded();
+        };
+
+        assets.opponentBase.onload = assetLoaded;
+        assets.opponentBase.src = 'assets/opponent-base.png';
+        assets.opponentBase.onerror = () => {
+            console.warn("Failed to load opponent base image, using fallback");
+            assetLoaded();
+        };
+
         // Set a timeout in case image loading takes too long
         setTimeout(() => {
             if (loaded < toLoad) {
@@ -118,15 +160,25 @@ function loadAssets() {
 
 // Resize canvas to fit screen
 function resizeCanvas() {
-    canvas.width = gameContainer.clientWidth;
-    canvas.height = gameContainer.clientHeight;
+    const gameContainer = document.getElementById('game-container');
+    const canvas = document.getElementById('game-canvas');
+    const cardContainer = document.querySelector('.card-container');
 
-    // Draw game elements with the proper scale
+    // Get the card container height
+    const cardContainerHeight = cardContainer.clientHeight;
+
+    // Set canvas dimensions
+    canvas.width = gameContainer.clientWidth;
+    canvas.height = gameContainer.clientHeight - cardContainerHeight;
+
+    // Update canvas position and size with CSS as well
+    canvas.style.height = `calc(100% - ${cardContainerHeight}px)`;
+
+    // Redraw game elements with proper scaling
     if (gameState) {
         drawGame();
     }
 }
-
 // Initialize event listeners and UI
 function setupUI() {
     // Set card images

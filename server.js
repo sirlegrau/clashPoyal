@@ -299,7 +299,7 @@ io.on('connection', (socket) => {
 
         // Randomize spawn position slightly around the base
         const spawnPos = {
-            x: player.basePosition.x + (Math.random() * 80 - 40),
+            x: player.basePosition.x + (Math.random() * 280 - 40),
             y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
         };
 

@@ -63,6 +63,16 @@ function drawGame() {
     const scaleX = canvas.width / GAME_WIDTH;
     const scaleY = canvas.height / GAME_HEIGHT;
 
+    // Load base images if not already loaded
+    if (!assets.playerBase) {
+        assets.playerBase = new Image();
+        assets.playerBase.src = 'assets/player-base.png';
+    }
+    if (!assets.opponentBase) {
+        assets.opponentBase = new Image();
+        assets.opponentBase.src = 'assets/opponent-base.png';
+    }
+
     // Draw bases
     for (const playerKey in gameState.players) {
         const player = gameState.players[playerKey];
@@ -70,20 +80,42 @@ function drawGame() {
         const baseY = player.basePosition.y * scaleY;
         const baseSize = 100 * Math.min(scaleX, scaleY);
 
-        // Draw base
+        // Draw base with image
         if (playerKey === playerId) {
-            ctx.fillStyle = '#27ae60'; // Green for player
+            if (assets.playerBase && assets.playerBase.complete && assets.playerBase.naturalWidth !== 0) {
+                ctx.drawImage(assets.playerBase,
+                    baseX - baseSize / 2,
+                    baseY - baseSize / 2,
+                    baseSize,
+                    baseSize);
+            } else {
+                // Fallback to circle if image not loaded
+                ctx.fillStyle = '#27ae60'; // Green for player
+                ctx.beginPath();
+                ctx.arc(baseX, baseY, baseSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
         } else {
-            ctx.fillStyle = '#e74c3c'; // Red for opponent
+            if (assets.opponentBase && assets.opponentBase.complete && assets.opponentBase.naturalWidth !== 0) {
+                ctx.drawImage(assets.opponentBase,
+                    baseX - baseSize / 2,
+                    baseY - baseSize / 2,
+                    baseSize,
+                    baseSize);
+            } else {
+                // Fallback to circle if image not loaded
+                ctx.fillStyle = '#e74c3c'; // Red for opponent
+                ctx.beginPath();
+                ctx.arc(baseX, baseY, baseSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
-
-        ctx.beginPath();
-        ctx.arc(baseX, baseY, baseSize / 2, 0, Math.PI * 2);
-        ctx.fill();
 
         // Draw base border
         ctx.strokeStyle = '#2c3e50';
         ctx.lineWidth = 3 * Math.min(scaleX, scaleY);
+        ctx.beginPath();
+        ctx.arc(baseX, baseY, baseSize / 2, 0, Math.PI * 2);
         ctx.stroke();
 
         // Draw health indicator
@@ -100,16 +132,30 @@ function drawGame() {
                 const troopX = troop.position.x * scaleX;
                 const troopY = troop.position.y * scaleY;
                 // Size varies by troop type
-                let troopSize = 30;
+                let troopSize = 60;
 
                 // Adjust size based on troop type
                 if (troop.type === 'tank') {
-                    troopSize = 40;
+                    troopSize = 120;
                 } else if (troop.type === 'archer') {
-                    troopSize = 25;
+                    troopSize = 70;
                 }
 
                 troopSize *= Math.min(scaleX, scaleY);
+
+                // Check if proper asset paths are set for enemy troops
+                if (!troopImages.enemySoldier) {
+                    troopImages.enemySoldier = new Image();
+                    troopImages.enemySoldier.src = 'assets/soldier.png';
+                }
+                if (!troopImages.enemyArcher) {
+                    troopImages.enemyArcher = new Image();
+                    troopImages.enemyArcher.src = 'assets/archer.png';
+                }
+                if (!troopImages.enemyTank) {
+                    troopImages.enemyTank = new Image();
+                    troopImages.enemyTank.src = 'assets/tank.png';
+                }
 
                 if (playerKey === playerId) {
                     // Draw correct troop image based on type
@@ -136,17 +182,36 @@ function drawGame() {
                         ctx.fill();
                     }
                 } else {
-                    // For opponent troops, use different colors based on type
+                    // Use same asset images for enemy troops, just tint them
+                    let enemyTroopImg;
+
                     if (troop.type === 'tank') {
-                        ctx.fillStyle = '#cd6155'; // Dark red for tanks
+                        enemyTroopImg = troopImages.enemyTank;
                     } else if (troop.type === 'archer') {
-                        ctx.fillStyle = '#e67e22'; // Orange for archers
+                        enemyTroopImg = troopImages.enemyArcher;
                     } else {
-                        ctx.fillStyle = '#c0392b'; // Default red for soldiers
+                        enemyTroopImg = troopImages.enemySoldier;
                     }
-                    ctx.beginPath();
-                    ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
-                    ctx.fill();
+
+                    if (enemyTroopImg && enemyTroopImg.complete && enemyTroopImg.naturalWidth !== 0) {
+                        ctx.drawImage(enemyTroopImg,
+                            troopX - troopSize / 2,
+                            troopY - troopSize / 2,
+                            troopSize,
+                            troopSize);
+                    } else {
+                        // Fallback to colored circles if assets aren't loaded
+                        if (troop.type === 'tank') {
+                            ctx.fillStyle = '#cd6155'; // Dark red for tanks
+                        } else if (troop.type === 'archer') {
+                            ctx.fillStyle = '#e67e22'; // Orange for archers
+                        } else {
+                            ctx.fillStyle = '#c0392b'; // Default red for soldiers
+                        }
+                        ctx.beginPath();
+                        ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
 
                 // Draw troop border
