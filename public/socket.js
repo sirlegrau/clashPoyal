@@ -28,11 +28,17 @@ function initSocketConnection() {
 
         // Make sure game container is visible
         gameContainer.style.display = 'block';
+
+        // Ensure canvas is properly sized when game starts
+        resizeCanvas();
     });
 
     socket.on('gameState', state => {
         // Update game state
         gameState = state;
+
+        // Make sure canvas is properly sized before drawing
+        resizeCanvas();
 
         // Update UI elements and redraw game
         updateUI();
@@ -54,7 +60,6 @@ function initSocketConnection() {
         logDebug(`Socket error: ${error}`);
     });
 }
-
 // Player actions
 function joinQueue() {
     if (socket && socket.connected) {
