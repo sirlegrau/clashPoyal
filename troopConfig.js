@@ -33,7 +33,7 @@ const troopTypes = {
         id: 'archer',
         health: 70,
         attack: 12,
-        range: 120,
+        range: 350,
         speed: 1.8,
         attackSpeed: 1.2,
         cost: 2,
