@@ -134,7 +134,7 @@
                     const healthBarBorderWidth = 3 * Math.min(scaleX, scaleY); // Increased from 2
 
                     // Maximum base health (assumed to be 500 based on the updateUI function)
-                    const maxBaseHealth = 500;
+                    const maxBaseHealth = 100;
                     const healthPercent = player.baseHealth / maxBaseHealth;
 
                     // Determine if this is top or bottom base

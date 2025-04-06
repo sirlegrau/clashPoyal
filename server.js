@@ -187,7 +187,7 @@ function startGameLoop(gameId) {
 
                         if (troop.currentTargetType === 'base') {
                             // Attack enemy base
-                            opponent.baseHealth -= Math.ceil(troopStats.attack / 1);
+                            opponent.baseHealth -= Math.ceil(troopStats.attack / 2);
                             if (opponent.baseHealth <= 0) {
                                 endGame(gameId, playerId);
                             }
