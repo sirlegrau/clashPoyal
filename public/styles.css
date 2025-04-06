@@ -258,3 +258,131 @@ button:hover {
         bottom: 110px;
     }
 }
+.mana-container {
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-bottom: 2px solid rgba(52, 152, 219, 0.5);
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+}
+
+.mana-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mana-icon {
+    font-size: 28px;
+    color: #3498db;
+    text-shadow: 0 0 8px #3498db;
+}
+
+.mana-bar {
+    flex-grow: 1;
+    height: 25px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.mana-fill {
+    height: 100%;
+    background: linear-gradient(to right, #3498db, #9b59b6);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.mana-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 1px 1px 3px black;
+}
+
+/* Card mana cost indicator */
+.mana-cost {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.8);
+    z-index: 5;
+}
+
+/* Troop type label */
+.troop-type {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 3px 0;
+}
+
+/* Existing card styles */
+.card {
+    position: relative;
+    width: 110px;
+    height: 120px;
+    background-color: #3498db;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Hidden cooldown element - we're not using it anymore */
+.card-cooldown {
+    display: none;
+}
+
+/* Soldier card */
+.card[data-troop-type="soldier"] {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+/* Archer card */
+.card[data-troop-type="archer"] {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+/* Tank card */
+.card[data-troop-type="tank"] {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+}

@@ -19,7 +19,11 @@ const CARD_COOLDOWN = 3000; // 3 seconds
 // Game state
 const games = {};
 const playerQueue = [];
-
+const rendCards = [
+    { id: 'card1', cooldown: 0, troopType: 'soldier', manaCost: 2 },
+    { id: 'card2', cooldown: 0, troopType: 'archer', manaCost: 5 },
+    { id: 'card3', cooldown: 0, troopType: 'tank', manaCost: 8 }
+]
 function createGame(player1Id, player2Id) {
     const gameId = `game_${Date.now()}`;
 
@@ -31,27 +35,24 @@ function createGame(player1Id, player2Id) {
                 basePosition: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - BASE_SIZE / 2 },
                 baseHealth: BASE_HEALTH,
                 troops: [],
-                cards: [
-                    { id: 'card1', cooldown: 0, troopType: 'soldier' },
-                    { id: 'card2', cooldown: 0, troopType: 'archer' },
-                    { id: 'card3', cooldown: 0, troopType: 'tank' }
-                ]
+                mana: 5, // Starting mana
+                maxMana: 10, // Maximum mana
+                lastManaUpdateTime: Date.now(),
+                cards: rendCards
             },
             [player2Id]: {
                 id: player2Id,
                 basePosition: { x: GAME_WIDTH / 2, y: BASE_SIZE / 2 },
                 baseHealth: BASE_HEALTH,
                 troops: [],
-                cards: [
-                    { id: 'card1', cooldown: 0, troopType: 'soldier' },
-                    { id: 'card2', cooldown: 0, troopType: 'archer' },
-                    { id: 'card3', cooldown: 0, troopType: 'tank' }
-                ]
+                mana: 5, // Starting mana
+                maxMana: 10, // Maximum mana
+                lastManaUpdateTime: Date.now(),
+                cards: rendCards
             }
         },
         active: true
     };
-
     games[gameId] = game;
 
     // Create room for this game to send updates more efficiently
@@ -94,12 +95,16 @@ function startGameLoop(gameId) {
             const player = game.players[playerId];
             if (!player) return;
 
-            // Decrease cooldowns
-            player.cards.forEach(card => {
-                if (card.cooldown > 0) {
-                    card.cooldown = Math.max(0, card.cooldown - 100);
-                }
-            });
+            // Generate mana - 1 per second
+            const now = Date.now();
+            const elapsedTime = now - player.lastManaUpdateTime;
+            const manaToAdd = (elapsedTime / 1000) / 2; // 1 mana per second (allow fractional)
+
+            if (elapsedTime > 0) {
+                player.mana = Math.min(player.maxMana, player.mana + manaToAdd);
+                player.lastManaUpdateTime = now; // Reset timer on every update
+            }
+
 
             // Update troop positions and handle attacks
             player.troops = player.troops.filter(troop => troop && troop.health > 0);
@@ -150,7 +155,7 @@ function startGameLoop(gameId) {
                         troop.lastAttackTime = now;
 
                         if (target.type === 'base') {
-                            opponent.baseHealth -= troopStats.attack / 10; // Reduced damage to base for balance
+                            opponent.baseHealth -= Math.ceil(troopStats.attack / 10);
                             if (opponent.baseHealth <= 0) {
                                 endGame(gameId, playerId);
                             }
@@ -281,13 +286,26 @@ io.on('connection', (socket) => {
         }
 
         const card = player.cards[cardIndex];
-        if (!card || card.cooldown > 0) {
-            console.log("Card not available or on cooldown");
+        if (!card) {
+            console.log("Card not found");
             return;
         }
 
-        // Apply cooldown
-        card.cooldown = CARD_COOLDOWN;
+        // REMOVED: Check cooldown first
+        // We're now relying solely on the mana system
+
+        // Check if player has enough mana
+        if (player.mana < card.manaCost) {
+            console.log("Not enough mana to play this card");
+            socket.emit('notEnoughMana');
+            return;
+        }
+
+        // Deduct mana cost
+        player.mana -= card.manaCost;
+
+        // REMOVED: Apply cooldown
+        // card.cooldown = CARD_COOLDOWN;
 
         // Get troop type from card
         const troopType = card.troopType;
@@ -317,7 +335,6 @@ io.on('connection', (socket) => {
         // Send immediate update to make spawning feel responsive
         io.to(gameId).emit('gameState', game);
     });
-
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);

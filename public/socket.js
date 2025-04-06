@@ -32,7 +32,13 @@ function initSocketConnection() {
         // Ensure canvas is properly sized when game starts
         resizeCanvas();
     });
+    socket.on('notEnoughMana', () => {
+        showNotification('Not enough mana!', 'error');
+    });
 
+    socket.on('cardOnCooldown', () => {
+        showNotification('Card is on cooldown!', 'error');
+    });
     socket.on('gameState', state => {
         // Update game state
         gameState = state;

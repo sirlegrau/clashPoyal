@@ -231,28 +231,61 @@ function setupUI() {
         waitingMessage.style.display = 'block';
     });
 }
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `game-notification ${type}`;
+    notification.textContent = message;
 
+    document.body.appendChild(notification);
+
+    // Animation
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    // Auto remove after delay
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 2000);
+}
 // Add CSS for troop type info
 function addCustomStyles() {
     const style = document.createElement('style');
     style.textContent = `
-    .troop-type {
-        position: absolute;
-        bottom: 5px;
-        left: 5px;
-        right: 5px;
-        text-align: center;
-        font-size: 12px;
+    /* Your existing styles... */
+    
+    .game-notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50px);
+        padding: 10px 20px;
+        background-color: rgba(0, 0, 0, 0.8);
         color: white;
-        text-shadow: 1px 1px 1px black;
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 2px;
-        border-radius: 3px;
+        border-radius: 5px;
+        z-index: 1000;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .game-notification.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    
+    .game-notification.error {
+        background-color: rgba(231, 76, 60, 0.9);
+    }
+    
+    .game-notification.success {
+        background-color: rgba(46, 204, 113, 0.9);
     }
     `;
     document.head.appendChild(style);
 }
-
 // Main initialization function
 async function init() {
     logDebug('Initializing game');
@@ -274,6 +307,5 @@ async function init() {
     // Initialize socket connection and handlers
     initSocketConnection();
 }
-
 // Start game when window loads
 window.onload = init;

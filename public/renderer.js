@@ -1,5 +1,4 @@
 // Game rendering and UI update functions
-
 function updateUI() {
     if (!gameState || !playerId || !opponentId || !gameState.players) return;
 
@@ -8,12 +7,30 @@ function updateUI() {
 
     if (!player || !opponent) return;
 
-    // Update card cooldowns and add troop type info
+    // Remove the old mana container code since we're now drawing it in the canvas
+    // The old mana container can be removed from the DOM if it exists
+    const oldManaContainer = document.getElementById('mana-container');
+    if (oldManaContainer) {
+        oldManaContainer.remove();
+    }
+
+    // Update card display to show mana cost and availability
     player.cards.forEach((card, index) => {
         if (index < cards.length) {
+            // Remove cooldown display - not using cooldowns anymore
             const cooldownEl = cards[index].querySelector('.card-cooldown');
-            const cooldownPercent = (card.cooldown / 3000) * 100;
-            cooldownEl.style.height = `${cooldownPercent}%`;
+            if (cooldownEl) {
+                cooldownEl.style.height = '0%';
+            }
+
+            // Add or update mana cost label
+            let manaCostLabel = cards[index].querySelector('.mana-cost');
+            if (!manaCostLabel) {
+                manaCostLabel = document.createElement('div');
+                manaCostLabel.className = 'mana-cost';
+                cards[index].appendChild(manaCostLabel);
+            }
+            manaCostLabel.textContent = card.manaCost;
 
             // Add or update troop type label
             let troopLabel = cards[index].querySelector('.troop-type');
@@ -22,30 +39,24 @@ function updateUI() {
                 troopLabel.className = 'troop-type';
                 cards[index].appendChild(troopLabel);
             }
+            troopLabel.textContent = card.troopType.charAt(0).toUpperCase() + card.troopType.slice(1);
 
-            // Set troop type info
-            let troopInfo = '';
-            if (card.troopType === 'soldier') {
-                troopInfo = 'Soldier<br>HP: 100 • DMG: 10';
-            } else if (card.troopType === 'archer') {
-                troopInfo = 'Archer<br>HP: 70 • DMG: 12';
-            } else if (card.troopType === 'tank') {
-                troopInfo = 'Tank<br>HP: 250 • DMG: 15';
-            }
-            troopLabel.innerHTML = troopInfo;
+            // Visual feedback for available cards - only based on mana now
+            const canPlayCard = player.mana >= card.manaCost;
 
-            // Visual feedback for available cards
-            if (card.cooldown === 0) {
+            if (canPlayCard) {
                 cards[index].style.opacity = '1';
                 cards[index].style.boxShadow = '0 0 10px rgba(52, 152, 219, 0.7)';
+                cards[index].setAttribute('data-can-play', 'true');
             } else {
-                cards[index].style.opacity = '0.7';
-                cards[index].style.boxShadow = '0 3px 6px rgba(0,0,0,0.16)';
+                // Not enough mana
+                cards[index].style.opacity = '0.5';
+                cards[index].style.boxShadow = '0 0 10px rgba(231, 76, 60, 0.7)';
+                cards[index].setAttribute('data-can-play', 'false');
             }
         }
     });
-}
-function drawGame() {
+}function drawGame() {
     if (!ctx || !gameState) return;
 
     // Clear canvas
@@ -184,6 +195,85 @@ function drawGame() {
             baseX,
             healthBarY + healthBarHeight/2
         );
+
+        // NEW CODE: Draw mana bar for the player only
+        if (playerKey === playerId) {
+            const manaBarWidth = healthBarWidth; // Same width as health bar
+            const manaBarHeight = healthBarHeight; // Same height as health bar
+            const manaBarSpacing = healthBarHeight + healthBarBorderWidth * 4; // Space between health and mana bar
+
+            // Position mana bar below health bar for bottom base, or above health bar for top base
+            let manaBarY;
+            if (isTopBase) {
+                // Position below health bar for top base
+                manaBarY = healthBarY + manaBarSpacing;
+            } else {
+                // Position above health bar for bottom base
+                manaBarY = healthBarY - manaBarSpacing;
+            }
+
+            // Draw mana bar background (border)
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(
+                baseX - manaBarWidth/2 - healthBarBorderWidth,
+                manaBarY - healthBarBorderWidth,
+                manaBarWidth + healthBarBorderWidth * 2,
+                manaBarHeight + healthBarBorderWidth * 2
+            );
+
+            // Draw mana bar background
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(
+                baseX - manaBarWidth/2,
+                manaBarY,
+                manaBarWidth,
+                manaBarHeight
+            );
+
+            // Calculate mana percentage
+            const manaPercent = player.mana / player.maxMana;
+
+            // Mana fill - gradient from blue to purple
+            const gradient = ctx.createLinearGradient(
+                baseX - manaBarWidth/2,
+                manaBarY,
+                baseX - manaBarWidth/2 + manaBarWidth * manaPercent,
+                manaBarY
+            );
+            gradient.addColorStop(0, '#3498db'); // Blue
+            gradient.addColorStop(1, '#9b59b6'); // Purple
+            ctx.fillStyle = gradient;
+
+            ctx.fillRect(
+                baseX - manaBarWidth/2,
+                manaBarY,
+                manaBarWidth * manaPercent,
+                manaBarHeight
+            );
+
+            // Add mana icon (lightning bolt)
+            const iconSize = manaBarHeight * 1.2;
+            ctx.fillStyle = '#f1c40f'; // Yellow/gold for the icon
+            ctx.font = `bold ${iconSize}px Arial`;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                '⚡',
+                baseX - manaBarWidth/2 - healthBarBorderWidth * 2,
+                manaBarY + manaBarHeight/2
+            );
+
+            // Add mana text on the bars
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${12 * Math.min(scaleX, scaleY)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                `${Math.floor(player.mana)}/${player.maxMana} Mana`,
+                baseX,
+                manaBarY + manaBarHeight/2
+            );
+        }
 
         // Draw troops
         if (player.troops && Array.isArray(player.troops)) {

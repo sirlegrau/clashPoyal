@@ -11,6 +11,7 @@ const troopTypes = {
         speed: 15,
         attackSpeed: 1, // attacks per second
         cost: 1,        // energy cost
+        manaCost: 1,    // mana cost to play this troop
         imageUrl: 'assets/soldier.png',
         description: 'Balanced infantry unit'
     },
@@ -24,6 +25,7 @@ const troopTypes = {
         speed: 3,
         attackSpeed: 0.7, // slower attack
         cost: 3,
+        manaCost: 3,    // mana cost to play this troop
         imageUrl: 'assets/tank.png',
         description: 'Heavy unit with high health'
     },
@@ -37,6 +39,7 @@ const troopTypes = {
         speed: 4,
         attackSpeed: 3,
         cost: 2,
+        manaCost: 2,    // mana cost to play this troop
         imageUrl: 'assets/archer.png',
         description: 'Ranged unit with high attack range'
     }
@@ -59,8 +62,13 @@ module.exports = {
         return cardTroopMapping[cardId] || troopTypes.soldier; // Default to soldier
     },
 
-    // Method to get troop config by troop type ID
+    // Method to get troop config by type ID
     getTroopConfigByTypeId: function(typeId) {
         return troopTypes[typeId] || troopTypes.soldier; // Default to soldier
+    },
+
+    // Get mana cost for a troop type
+    getManaCost: function(typeId) {
+        return troopTypes[typeId]?.manaCost || 1; // Default to 1
     }
 };
