@@ -77,7 +77,22 @@ function drawGame() {
     // Calculate scale factor
     const scaleX = canvas.width / GAME_WIDTH;
     const scaleY = canvas.height / GAME_HEIGHT;
+    if (!assets.background) {
+        assets.background = new Image();
+        assets.background.src = 'assets/background.png'; // Place your background image in the assets folder
+    }
 
+    // Draw background
+    if (assets.background && assets.background.complete && assets.background.naturalWidth !== 0) {
+        ctx.drawImage(assets.background, 0, 0, canvas.width, canvas.height);
+    } else {
+        // Fallback background (a simple gradient)
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#87CEEB');  // Sky blue at top
+        gradient.addColorStop(1, '#8ED1FC');  // Lighter blue at bottom
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     // Load base images if not already loaded
     if (!assets.playerBase) {
         assets.playerBase = new Image();
@@ -147,12 +162,6 @@ function drawGame() {
                     ctx.lineTo(midX, midY);
                     ctx.lineTo(targetX, targetY);
                     ctx.stroke();
-
-                    // Add glow effect around target
-                    ctx.fillStyle = 'rgba(241, 196, 15, 0.3)';
-                    ctx.beginPath();
-                    ctx.arc(targetX, targetY, 20 * Math.min(scaleX, scaleY), 0, Math.PI * 2);
-                    ctx.fill();
                 }
             }
         }
@@ -193,7 +202,7 @@ function drawGame() {
             ctx.fillStyle = playerKey === playerId ?
                 'rgba(39, 174, 96, 0.3)' : 'rgba(231, 76, 60, 0.3)';
             ctx.beginPath();
-            ctx.arc(baseX, baseY, baseSize * 0.75, 0, Math.PI * 2);
+                ctx.arc(baseX, baseY, baseSize * 0.75, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -418,13 +427,6 @@ function drawGame() {
                         ctx.fill();
                     }
                 }
-
-                // Draw troop border
-                ctx.strokeStyle = '#2c3e50';
-                ctx.lineWidth = 2 * Math.min(scaleX, scaleY);
-                ctx.beginPath();
-                ctx.arc(displayX, displayY, troopSize / 2, 0, Math.PI * 2);
-                ctx.stroke();
 
                 // Draw health bar
                 const healthBarWidth = troopSize;
