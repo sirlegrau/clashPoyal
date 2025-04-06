@@ -16,9 +16,9 @@ const BASE_SIZE = 150;
 const BASE_HEALTH = 100;
 
 // Base attack constants
-const BASE_ATTACK_RANGE = 200; // Range in game units
-const BASE_ATTACK_DAMAGE = 5; // Damage per attack
-const BASE_ATTACK_SPEED = 1.5; // Attacks per second
+const BASE_ATTACK_RANGE = 230; // Range in game units
+const BASE_ATTACK_DAMAGE = 3; // Damage per attack
+const BASE_ATTACK_SPEED = 1.2; // Attacks per second
 
 // Game state
 const games = {};
