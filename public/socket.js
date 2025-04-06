@@ -31,21 +31,22 @@ function initSocketConnection() {
 
         // Ensure canvas is properly sized when game starts
         resizeCanvas();
+        initializeCardDisplay();
+
     });
     socket.on('notEnoughMana', () => {
-        showNotification('Not enough mana!', 'error');
+        showNotification('💦 No tienes suficiente cum! 💦', 'error');
     });
-
-    socket.on('cardOnCooldown', () => {
-        showNotification('Card is on cooldown!', 'error');
-    });
+    let exec = false;
     socket.on('gameState', state => {
         // Update game state
         gameState = state;
-
         // Make sure canvas is properly sized before drawing
-        resizeCanvas();
-
+        //resizeCanvas();
+        if(!exec){
+            initializeCardDisplay()
+            exec = true;
+        }
         // Update UI elements and redraw game
         updateUI();
         drawGame();

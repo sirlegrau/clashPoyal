@@ -299,20 +299,7 @@ button:hover {
     font-size: 12px;
 }
 
-/* Soldier card */
-.card[data-troop-type="soldier"] {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-}
 
-/* Archer card */
-.card[data-troop-type="archer"] {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-}
-
-/* Tank card */
-.card[data-troop-type="tank"] {
-    background: linear-gradient(135deg, #e67e22, #d35400);
-}
 
 /* Game notification */
 .game-notification {

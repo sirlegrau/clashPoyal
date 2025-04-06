@@ -3,16 +3,16 @@
 const TROOP_CONFIG = {
     // Base troop configuration with health, size, and colors
     types: {
-        soldier: {
-            maxHealth: 10,
+        escroto: {
+            maxHealth: 2,
             size: 70,
             playerColor: '#2980b9',
             enemyColor: '#c0392b',
             attackColor: '#f39c12'
         },
         tank: {
-            maxHealth: 25,
-            size: 135,
+            maxHealth: 40,
+            size: 150,
             playerColor: '#7f8c8d',
             enemyColor: '#cd6155',
             attackColor: '#e74c3c'
@@ -25,7 +25,7 @@ const TROOP_CONFIG = {
             attackColor: '#9b59b6'
         },
         berserker: {
-            maxHealth: 12,
+            maxHealth: 15,
             size: 90,
             playerColor: '#e74c3c',
             enemyColor: '#d35400',
@@ -33,7 +33,7 @@ const TROOP_CONFIG = {
         },
         knight: {
             maxHealth: 18,
-            size: 110,
+            size: 100,
             playerColor: '#f39c12',
             enemyColor: '#b9770e',
             attackColor: '#d35400'
@@ -49,23 +49,23 @@ const TROOP_CONFIG = {
 
     // Helper functions for accessing troop data
     getTroopMaxHealth: function(troopType) {
-        return this.types[troopType]?.maxHealth || this.types.soldier.maxHealth;
+        return this.types[troopType]?.maxHealth || this.types.escroto.maxHealth;
     },
 
     getTroopSize: function(troopType) {
-        return this.types[troopType]?.size || this.types.soldier.size;
+        return this.types[troopType]?.size || this.types.escroto.size;
     },
 
     getPlayerColor: function(troopType) {
-        return this.types[troopType]?.playerColor || this.types.soldier.playerColor;
+        return this.types[troopType]?.playerColor || this.types.escroto.playerColor;
     },
 
     getEnemyColor: function(troopType) {
-        return this.types[troopType]?.enemyColor || this.types.soldier.enemyColor;
+        return this.types[troopType]?.enemyColor || this.types.escroto.enemyColor;
     },
 
     getAttackColor: function(troopType) {
-        return this.types[troopType]?.attackColor || this.types.soldier.attackColor;
+        return this.types[troopType]?.attackColor || this.types.escroto.attackColor;
     },
 
     // Game constants

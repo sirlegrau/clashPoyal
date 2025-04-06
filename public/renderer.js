@@ -356,8 +356,26 @@ function drawGame() {
             player.troops.forEach(troop => {
                 if (!troop || !troop.position) return;
 
-                const troopX = troop.position.x * scaleX;
-                const troopY = troop.position.y * scaleY;
+                // Initialize projectiles array if it doesn't exist
+                if (!window.projectiles) {
+                    window.projectiles = [];
+                }
+
+                // Get base position of the troop
+                let troopX = troop.position.x * scaleX;
+                let troopY = troop.position.y * scaleY;
+
+                // Apply jiggle effect if troop is attacking (small random movement)
+                let jiggleX = 0;
+                let jiggleY = 0;
+                if (troop.attacking) {
+                    jiggleX = (Math.random() * 6 - 3) * Math.min(scaleX, scaleY);
+                    jiggleY = (Math.random() * 6 - 3) * Math.min(scaleX, scaleY);
+                }
+
+                // Apply jiggle to position
+                const displayX = troopX + jiggleX;
+                const displayY = troopY + jiggleY;
 
                 // Get troop size from config
                 let troopSize = TROOP_CONFIG.getTroopSize(troop.type) * Math.min(scaleX, scaleY);
@@ -379,15 +397,15 @@ function drawGame() {
 
                     if (troopImg && troopImg.complete && troopImg.naturalWidth !== 0) {
                         ctx.drawImage(troopImg,
-                            troopX - troopSize / 2,
-                            troopY - troopSize / 2,
+                            displayX - troopSize / 2,
+                            displayY - troopSize / 2,
                             troopSize,
                             troopSize);
                     } else {
                         // Fallback - color by troop type from config
                         ctx.fillStyle = TROOP_CONFIG.getPlayerColor(troop.type);
                         ctx.beginPath();
-                        ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
+                        ctx.arc(displayX, displayY, troopSize / 2, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 } else {
@@ -397,15 +415,15 @@ function drawGame() {
 
                     if (enemyTroopImg && enemyTroopImg.complete && enemyTroopImg.naturalWidth !== 0) {
                         ctx.drawImage(enemyTroopImg,
-                            troopX - troopSize / 2,
-                            troopY - troopSize / 2,
+                            displayX - troopSize / 2,
+                            displayY - troopSize / 2,
                             troopSize,
                             troopSize);
                     } else {
                         // Fallback to colored circles if assets aren't loaded
                         ctx.fillStyle = TROOP_CONFIG.getEnemyColor(troop.type);
                         ctx.beginPath();
-                        ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
+                        ctx.arc(displayX, displayY, troopSize / 2, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 }
@@ -414,7 +432,7 @@ function drawGame() {
                 ctx.strokeStyle = '#2c3e50';
                 ctx.lineWidth = 2 * Math.min(scaleX, scaleY);
                 ctx.beginPath();
-                ctx.arc(troopX, troopY, troopSize / 2, 0, Math.PI * 2);
+                ctx.arc(displayX, displayY, troopSize / 2, 0, Math.PI * 2);
                 ctx.stroke();
 
                 // Draw health bar
@@ -427,7 +445,7 @@ function drawGame() {
 
                 // Background
                 ctx.fillStyle = '#7f8c8d';
-                ctx.fillRect(troopX - healthBarWidth / 2, troopY - troopSize / 2 - healthBarHeight * 2,
+                ctx.fillRect(displayX - healthBarWidth / 2, displayY - troopSize / 2 - healthBarHeight * 2,
                     healthBarWidth, healthBarHeight);
 
                 // Health fill - color based on health percentage
@@ -439,20 +457,100 @@ function drawGame() {
                     ctx.fillStyle = '#e74c3c'; // Red
                 }
 
-                ctx.fillRect(troopX - healthBarWidth / 2, troopY - troopSize / 2 - healthBarHeight * 2,
+                ctx.fillRect(displayX - healthBarWidth / 2, displayY - troopSize / 2 - healthBarHeight * 2,
                     healthBarWidth * healthPercent, healthBarHeight);
 
-                // Show attack animation
-                if (troop.attacking) {
-                    // Different attack animation colors based on troop type from config
-                    ctx.strokeStyle = TROOP_CONFIG.getAttackColor(troop.type);
-                    ctx.lineWidth = 2 * Math.min(scaleX, scaleY);
-                    ctx.beginPath();
-                    ctx.arc(troopX, troopY, troopSize, 0, Math.PI * 2);
-                    ctx.stroke();
+                // Create projectile for ranged units if attacking
+                if (troop.attacking && (troop.type === 'archer' || troop.type === 'mage')) {
+                    // Find the target
+                    const opponentId = Object.keys(gameState.players).find(id => id !== playerKey);
+                    const opponent = gameState.players[opponentId];
+
+                    if (opponent && opponent.troops) {
+                        const targetTroop = opponent.troops.find(t => t && t.id === troop.attacking.target);
+
+                        if (targetTroop && targetTroop.position) {
+                            const targetX = targetTroop.position.x * scaleX;
+                            const targetY = targetTroop.position.y * scaleY;
+
+                            // Only create a new projectile occasionally to avoid flooding
+                            if (Math.random() < 0.05) { // 5% chance each frame
+                                let projectileType = troop.type === 'archer' ? 'arrow' : 'fireball';
+
+                                // Create new projectile
+                                window.projectiles.push({
+                                    fromX: troopX,
+                                    fromY: troopY,
+                                    toX: targetX,
+                                    toY: targetY,
+                                    type: projectileType,
+                                    progress: 0,
+                                    startTime: Date.now(),
+                                    owner: playerKey
+                                });
+                            }
+                        }
+                    }
                 }
             });
         }
+    }
+
+    // Draw projectiles
+    if (window.projectiles && window.projectiles.length > 0) {
+        window.projectiles.forEach((projectile, index) => {
+            // Calculate progress based on time (animate over 500ms)
+            const now = Date.now();
+            const elapsed = now - projectile.startTime;
+            projectile.progress = Math.min(elapsed / 500, 1); // 500ms flight time
+
+            // Calculate current position with arc for archers, straight line for mages
+            let currentX, currentY;
+
+            if (projectile.type === 'arrow') {
+                // Arched trajectory for arrows
+                currentX = projectile.fromX + (projectile.toX - projectile.fromX) * projectile.progress;
+                // Add arc height based on progress (highest at 0.5)
+                const arcHeight = 30 * Math.min(scaleX, scaleY); // Maximum arc height
+                const arcFactor = 4 * projectile.progress * (1 - projectile.progress); // Equals 1 at progress = 0.5
+                currentY = projectile.fromY + (projectile.toY - projectile.fromY) * projectile.progress - arcHeight * arcFactor;
+            } else {
+                // Straight line for fireballs
+                currentX = projectile.fromX + (projectile.toX - projectile.fromX) * projectile.progress;
+                currentY = projectile.fromY + (projectile.toY - projectile.fromY) * projectile.progress;
+            }
+
+            // Load projectile images if needed
+            if (!assets[projectile.type]) {
+                assets[projectile.type] = new Image();
+                assets[projectile.type].src = `assets/${projectile.type}.png`;
+            }
+
+            // Draw projectile
+            const projectileSize = 20 * Math.min(scaleX, scaleY);
+
+            if (assets[projectile.type] && assets[projectile.type].complete) {
+                // Draw image
+                ctx.drawImage(
+                    assets[projectile.type],
+                    currentX - projectileSize/2,
+                    currentY - projectileSize/2,
+                    projectileSize,
+                    projectileSize
+                );
+            } else {
+                // Fallback shape (small circle)
+                ctx.fillStyle = projectile.type === 'arrow' ? '#2c3e50' : '#e67e22';
+                ctx.beginPath();
+                ctx.arc(currentX, currentY, projectileSize/3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Remove projectile if it reached its target
+            if (projectile.progress >= 1) {
+                window.projectiles.splice(index, 1);
+            }
+        });
     }
 
     // Draw player position indicators
@@ -469,7 +567,6 @@ function drawGame() {
         ctx.fillText('OPPONENT', GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 20) * scaleY);
     }
 }
-
 // Card animation functions
 function animateCardReplacement(cardElement, newCardData) {
     // Animate the card being played (shrink and fade out)
@@ -524,6 +621,24 @@ function updateCardElement(cardElement, cardData) {
         tempImg.src = newSrc;
     }
 }
+// Add this code to your initialization logic where you first receive player cards
+function initializeCardDisplay() {
+    if (!gameState || !playerId || !gameState.players[playerId]?.cards) return;
 
+    const player = gameState.players[playerId];
+
+    // Update each card element with correct initial data
+    player.cards.forEach((card, index) => {
+        if (index < cards.length) {
+            updateCardElement(cards[index], card);
+        }
+    });
+
+    // Store initial card data
+    previousCardData = JSON.parse(JSON.stringify(player.cards));
+}
+
+// Call this after receiving the initial game state
+// For example, add this call after setting gameState in your gameStart or initial gameState handler
 // Keep track of previous card data to detect changes
 let previousCardData = [];

@@ -24,26 +24,26 @@ const BASE_ATTACK_SPEED = 1.5; // Attacks per second
 const games = {};
 const playerQueue = [];
 const CARD_POOL = [
-    { id: 'card1',troopType: 'soldier', manaCost: 2 },
+    { id: 'card1',troopType: 'escroto', manaCost: 1 },
     { id: 'card2',troopType: 'archer', manaCost: 5 },
     { id: 'card3',troopType: 'tank', manaCost: 8 },
     { id: 'card4',troopType: 'berserker', manaCost: 4 },
-    { id: 'card5',troopType: 'knight', manaCost: 6 },
+    { id: 'card5',troopType: 'knight', manaCost: 3 },
     { id: 'card6',troopType: 'mage', manaCost: 7 }
 ];
 
 function getInitialCards() {
-    // Shuffle and get first 3 cards
-    return shuffleArray([...CARD_POOL]).slice(0, 3);
+    // Return 3 copies of the escroto card
+    return Array(3).fill({ id: 'card1', troopType: 'escroto', manaCost: 1 });
 }
 
-// Add this shuffle function
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+// Modify the drawNewCard function to avoid giving the same card that was just played
+function drawNewCard(playedCardId) {
+    // Filter out the card that was just played
+    const availableCards = CARD_POOL.filter(card => card.id !== playedCardId);
+
+    // Return a random card from the filtered pool
+    return availableCards[Math.floor(Math.random() * availableCards.length)];
 }
 
 function createGame(player1Id, player2Id) {
@@ -358,10 +358,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    function drawNewCard() {
-        // Return a random card from the pool
-        return CARD_POOL[Math.floor(Math.random() * CARD_POOL.length)];
-    }
     // Player played a card
     socket.on('playCard', ({ gameId, cardIndex }) => {
         console.log(`Player ${socket.id} played card ${cardIndex} in game ${gameId}`);
@@ -383,9 +379,10 @@ io.on('connection', (socket) => {
             console.log("Card not found");
             return;
         }
+
         // Check if player has enough mana
         if (player.mana < card.manaCost) {
-            console.log("Not enough mana to play this card");
+            console.log("💦 No tienes suficiente cum!");
             socket.emit('notEnoughMana');
             return;
         }
@@ -419,12 +416,15 @@ io.on('connection', (socket) => {
 
         player.troops.push(newTroop);
 
-        // Draw a new card to replace the played one
-        player.cards[cardIndex] = drawNewCard();
+        // Store the played card's ID before replacing it
+        const playedCardId = card.id;
+
+        // Draw a new card to replace the played one, ensuring it's different
+        player.cards[cardIndex] = drawNewCard(playedCardId);
 
         // Send immediate update to make spawning feel responsive
         io.to(gameId).emit('gameState', game);
-    });  // Handle disconnection
+    });
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);
 

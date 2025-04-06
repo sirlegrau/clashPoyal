@@ -21,11 +21,12 @@
         opponentBase: new Image()
     };
     const troopImages = {
-        soldier: new Image(),
+        escroto: new Image(),
         archer: new Image(),
         tank: new Image(),
+
     
-        enemySoldier: new Image(),
+        enemyEscroto: new Image(),
         enemyArcher: new Image(),
         enemyTank: new Image()
     };
@@ -62,7 +63,7 @@
                     resolve();
                 }
             }
-    
+
             // Load original assets
             assets.troop.onload = assetLoaded;
             assets.troop.src = 'assets/troop.png';
@@ -93,9 +94,9 @@
             };
     
             // Load troop type images
-            troopImages.soldier.onload = assetLoaded;
-            troopImages.soldier.src = 'assets/soldier.png';
-            troopImages.soldier.onerror = () => {
+            troopImages.escroto.onload = assetLoaded;
+            troopImages.escroto.src = 'assets/escroto.png';
+            troopImages.escroto.onerror = () => {
                 console.warn("Failed to load soldier image, using fallback");
                 assetLoaded();
             };
@@ -115,9 +116,9 @@
             };
     
             // Load enemy troop images (same assets, but separate instances for potential tinting)
-            troopImages.enemySoldier.onload = assetLoaded;
-            troopImages.enemySoldier.src = 'assets/soldier.png';
-            troopImages.enemySoldier.onerror = () => {
+            troopImages.enemyEscroto.onload = assetLoaded;
+            troopImages.enemyEscroto.src = 'assets/escroto.png';
+            troopImages.enemyEscroto.onerror = () => {
                 console.warn("Failed to load enemy soldier image, using fallback");
                 assetLoaded();
             };
