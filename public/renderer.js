@@ -1,8 +1,3 @@
-// Make sure to import the config at the top of your file
-// For browser:
-// <script src="troopConfig.js"></script>
-// For Node.js:
-// const TROOP_CONFIG = require('./troopConfig.js');
 
 function updateUI() {
     if (!gameState || !playerId || !opponentId || !gameState.players) return;
@@ -123,6 +118,54 @@ function drawGame() {
 
         const baseSize = 100 * Math.min(scaleX, scaleY);
 
+        // Draw base attack range indicator if debug mode enabled
+        if (window.debugMode) {
+            const baseAttackRange = 200 * Math.min(scaleX, scaleY); // Match the BASE_ATTACK_RANGE from server
+            ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(baseX, baseY, baseAttackRange, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Draw base attack animation when attacking
+        if (player.baseAttacking) {
+            // Find the targeted enemy troop
+            const opponentId = Object.keys(gameState.players).find(id => id !== playerKey);
+            const opponent = gameState.players[opponentId];
+
+            if (opponent && opponent.troops) {
+                const targetTroop = opponent.troops.find(t => t && t.id === player.baseAttacking.target);
+
+                if (targetTroop && targetTroop.position) {
+                    const targetX = targetTroop.position.x * scaleX;
+                    const targetY = targetTroop.position.y * scaleY;
+
+                    // Draw lightning bolt from base to target
+                    ctx.strokeStyle = '#f1c40f'; // Yellow lightning
+                    ctx.lineWidth = 3 * Math.min(scaleX, scaleY);
+
+                    // Create a lightning path with some randomness
+                    ctx.beginPath();
+                    ctx.moveTo(baseX, baseY);
+
+                    // Calculate midpoints with offsets for zigzag effect
+                    const midX = (baseX + targetX) / 2 + (Math.random() * 40 - 20) * Math.min(scaleX, scaleY);
+                    const midY = (baseY + targetY) / 2 + (Math.random() * 40 - 20) * Math.min(scaleX, scaleY);
+
+                    ctx.lineTo(midX, midY);
+                    ctx.lineTo(targetX, targetY);
+                    ctx.stroke();
+
+                    // Add glow effect around target
+                    ctx.fillStyle = 'rgba(241, 196, 15, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 20 * Math.min(scaleX, scaleY), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
         // Draw base with image
         if (playerKey === playerId) {
             if (assets.playerBase && assets.playerBase.complete && assets.playerBase.naturalWidth !== 0) {
@@ -152,6 +195,15 @@ function drawGame() {
                 ctx.arc(baseX, baseY, baseSize / 2, 0, Math.PI * 2);
                 ctx.fill();
             }
+        }
+
+        // Base glow effect when attacking
+        if (player.baseAttacking) {
+            ctx.fillStyle = playerKey === playerId ?
+                'rgba(39, 174, 96, 0.3)' : 'rgba(231, 76, 60, 0.3)';
+            ctx.beginPath();
+            ctx.arc(baseX, baseY, baseSize * 0.75, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         // Draw health bar for base - INCREASED SIZE
@@ -255,8 +307,6 @@ function drawGame() {
                 manaBarWidth,
                 manaBarHeight
             );
-
-            // Calculate mana percentage
             const manaPercent = player.mana / player.maxMana;
 
             // Mana fill - gradient from blue to purple
@@ -284,7 +334,7 @@ function drawGame() {
             ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
             ctx.fillText(
-                '⚡',
+                '💦',
                 baseX - manaBarWidth/2 - healthBarBorderWidth * 2,
                 manaBarY + manaBarHeight/2
             );
@@ -295,7 +345,7 @@ function drawGame() {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(
-                `${Math.floor(player.mana)}/${player.maxMana} Mana`,
+                `${Math.floor(player.mana)}/${player.maxMana} Cum`,
                 baseX,
                 manaBarY + manaBarHeight/2
             );

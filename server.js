@@ -15,6 +15,11 @@ const GAME_HEIGHT = 800;
 const BASE_SIZE = 150;
 const BASE_HEALTH = 100;
 
+// Base attack constants
+const BASE_ATTACK_RANGE = 200; // Range in game units
+const BASE_ATTACK_DAMAGE = 5; // Damage per attack
+const BASE_ATTACK_SPEED = 1.5; // Attacks per second
+
 // Game state
 const games = {};
 const playerQueue = [];
@@ -55,6 +60,7 @@ function createGame(player1Id, player2Id) {
                 mana: 5, // Starting mana
                 maxMana: 10, // Maximum mana
                 lastManaUpdateTime: Date.now(),
+                lastBaseAttackTime: Date.now(), // Track last base attack time
                 cards: getInitialCards()
             },
             [player2Id]: {
@@ -65,6 +71,7 @@ function createGame(player1Id, player2Id) {
                 mana: 5, // Starting mana
                 maxMana: 10, // Maximum mana
                 lastManaUpdateTime: Date.now(),
+                lastBaseAttackTime: Date.now(), // Track last base attack time
                 cards: getInitialCards()
             }
         },
@@ -96,6 +103,7 @@ function createGame(player1Id, player2Id) {
 
     return game;
 }
+
 function startGameLoop(gameId) {
     const game = games[gameId];
     if (!game) return;
@@ -130,6 +138,53 @@ function startGameLoop(gameId) {
 
             const opponent = game.players[opponentId];
             if (!opponent || !opponent.basePosition) return;
+
+            // BASE ATTACKS ENEMY TROOPS
+            // Check if it's time for the base to attack
+            const attackElapsedTime = now - player.lastBaseAttackTime;
+            const attackCooldown = 1000 / BASE_ATTACK_SPEED; // Convert attacks per second to milliseconds
+
+            if (attackElapsedTime >= attackCooldown) {
+                // Find enemy troops in range of the base
+                const enemyTroopsInRange = opponent.troops.filter(troop => {
+                    if (!troop || !troop.position) return false;
+                    return calculateDistance(player.basePosition, troop.position) <= BASE_ATTACK_RANGE;
+                });
+
+                // If there are enemy troops in range, attack the closest one
+                if (enemyTroopsInRange.length > 0) {
+                    // Sort by distance to find closest
+                    enemyTroopsInRange.sort((a, b) => {
+                        const distA = calculateDistance(player.basePosition, a.position);
+                        const distB = calculateDistance(player.basePosition, b.position);
+                        return distA - distB;
+                    });
+
+                    // Attack the closest enemy troop
+                    const targetTroop = enemyTroopsInRange[0];
+                    targetTroop.health -= BASE_ATTACK_DAMAGE;
+
+                    // Mark the troop as being targeted by the base
+                    targetTroop.targetedByBase = true;
+
+                    // Reset the base attack timer
+                    player.lastBaseAttackTime = now;
+
+                    // Add a base attack event for visualization
+                    player.baseAttacking = {
+                        target: targetTroop.id,
+                        timestamp: now
+                    };
+                } else {
+                    // No enemies in range, clear base attacking state
+                    player.baseAttacking = null;
+                }
+            } else {
+                // Decay base attack visualization after 200ms
+                if (player.baseAttacking && now - player.baseAttacking.timestamp > 200) {
+                    player.baseAttacking = null;
+                }
+            }
 
             // Update each troop
             player.troops.forEach(troop => {
@@ -239,6 +294,7 @@ function startGameLoop(gameId) {
 
     }, 100); // Update 10 times per second
 }
+
 function calculateDistance(pos1, pos2) {
     if (!pos1 || !pos2) return Infinity;
     const dx = pos1.x - pos2.x;

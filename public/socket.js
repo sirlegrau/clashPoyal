@@ -53,7 +53,7 @@ function initSocketConnection() {
 
     socket.on('gameOver', data => {
         logDebug(`Game over: ${data.result}`);
-        resultText.textContent = data.result === 'win' ? 'You Win!' : 'You Lose!';
+        resultText.textContent = data.result === 'win' ? '🍆Te lo culiaste!!🥵' : '💦💦Nooo! te culiaron 😢!';
         gameContainer.style.display = 'none';
         gameOverScreen.style.display = 'flex';
     });
