@@ -5,13 +5,13 @@ const troopTypes = {
     // Regular soldier - balanced stats
     soldier: {
         id: 'soldier',
-        health: 100,
-        attack: 10,
+        health: 10,
+        attack: 1,
         range: 50,
-        speed: 15,
+        speed: 12,
         attackSpeed: 1, // attacks per second
         cost: 1,        // energy cost
-        manaCost: 1,    // mana cost to play this troop
+        manaCost: 2,    // mana cost to play this troop
         imageUrl: 'assets/soldier.png',
         description: 'Balanced infantry unit'
     },
@@ -19,13 +19,13 @@ const troopTypes = {
     // Tank - high health, low speed, medium damage
     tank: {
         id: 'tank',
-        health: 250,
-        attack: 15,
+        health: 25,
+        attack: 2,
         range: 40,
         speed: 3,
-        attackSpeed: 0.7, // slower attack
+        attackSpeed: 1, // slower attack
         cost: 3,
-        manaCost: 3,    // mana cost to play this troop
+        manaCost: 8,    // mana cost to play this troop
         imageUrl: 'assets/tank.png',
         description: 'Heavy unit with high health'
     },
@@ -33,13 +33,13 @@ const troopTypes = {
     // Archer - low health, high range, medium damage
     archer: {
         id: 'archer',
-        health: 70,
-        attack: 12,
-        range: 350,
-        speed: 4,
-        attackSpeed: 3,
+        health: 5,
+        attack: 3,
+        range: 300,
+        speed: 5,
+        attackSpeed: 1,
         cost: 2,
-        manaCost: 2,    // mana cost to play this troop
+        manaCost: 5,    // mana cost to play this troop
         imageUrl: 'assets/archer.png',
         description: 'Ranged unit with high attack range'
     }

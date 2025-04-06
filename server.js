@@ -12,9 +12,8 @@ app.use(express.static('public'));
 // Game constants
 const GAME_WIDTH = 600;
 const GAME_HEIGHT = 800;
-const BASE_SIZE = 100;
-const BASE_HEALTH = 500;
-const CARD_COOLDOWN = 3000; // 3 seconds
+const BASE_SIZE = 150;
+const BASE_HEALTH = 100;
 
 // Game state
 const games = {};
@@ -79,7 +78,6 @@ function createGame(player1Id, player2Id) {
 
     return game;
 }
-
 function startGameLoop(gameId) {
     const game = games[gameId];
     if (!game) return;
@@ -105,62 +103,97 @@ function startGameLoop(gameId) {
                 player.lastManaUpdateTime = now; // Reset timer on every update
             }
 
-
-            // Update troop positions and handle attacks
+            // Remove dead troops
             player.troops = player.troops.filter(troop => troop && troop.health > 0);
+
+            // Find opponent
+            const opponentId = Object.keys(game.players).find(id => id !== playerId);
+            if (!opponentId) return;
+
+            const opponent = game.players[opponentId];
+            if (!opponent || !opponent.basePosition) return;
+
+            // Update each troop
             player.troops.forEach(troop => {
                 if (!troop || !troop.position) return;
 
                 const troopStats = troopConfig.getTroopConfigByTypeId(troop.type);
 
-                // Find closest enemy or enemy base
-                let target = null;
-                let minDistance = Infinity;
+                // If troop doesn't have a target yet, find the closest target
+                if (!troop.currentTarget) {
+                    let minDistance = Infinity;
 
-                // Find opponent
-                const opponentId = Object.keys(game.players).find(id => id !== playerId);
-                if (!opponentId) return;
+                    // Check distance to enemy base
+                    const distToBase = calculateDistance(troop.position, opponent.basePosition);
+                    if (distToBase < minDistance) {
+                        minDistance = distToBase;
+                        troop.currentTarget = opponentId;
+                        troop.currentTargetType = 'base';
+                    }
 
-                const opponent = game.players[opponentId];
-                if (!opponent || !opponent.basePosition) return;
-
-                // Check distance to enemy base
-                const distToBase = calculateDistance(troop.position, opponent.basePosition);
-                if (distToBase < minDistance) {
-                    minDistance = distToBase;
-                    target = { type: 'base', id: opponentId };
-                }
-
-                // Check distance to enemy troops
-                if (opponent.troops && Array.isArray(opponent.troops)) {
+                    // Check distance to enemy troops
                     opponent.troops.forEach(enemyTroop => {
-                        if (!enemyTroop || !enemyTroop.position) return;
+                        if (!enemyTroop || !enemyTroop.position || enemyTroop.health <= 0) return;
 
                         const dist = calculateDistance(troop.position, enemyTroop.position);
                         if (dist < minDistance) {
                             minDistance = dist;
-                            target = { type: 'troop', id: enemyTroop.id };
+                            troop.currentTarget = enemyTroop.id;
+                            troop.currentTargetType = 'troop';
                         }
                     });
                 }
 
+                // Get target position
+                let targetPosition;
+                let targetExists = false;
+
+                if (troop.currentTargetType === 'base') {
+                    // Base always exists
+                    targetExists = true;
+                    targetPosition = opponent.basePosition;
+                } else if (troop.currentTargetType === 'troop') {
+                    // Check if targeted troop still exists
+                    const targetTroop = opponent.troops.find(t => t && t.id === troop.currentTarget && t.health > 0);
+                    if (targetTroop) {
+                        targetExists = true;
+                        targetPosition = targetTroop.position;
+                    } else {
+                        // Target troop is dead, clear target to find a new one
+                        troop.currentTarget = null;
+                        troop.currentTargetType = null;
+                        // Default to enemy base until we find a new target
+                        targetPosition = opponent.basePosition;
+                    }
+                }
+
+                // If no target is set, use enemy base as default
+                if (!targetPosition) {
+                    targetPosition = opponent.basePosition;
+                }
+
+                // Calculate distance to target
+                const distanceToTarget = calculateDistance(troop.position, targetPosition);
+
                 // Attack or move
-                if (target && minDistance <= troopStats.range) {
-                    // Attack
+                if (targetExists && distanceToTarget <= troopStats.range) {
+                    // In range to attack
                     troop.attacking = true;
 
-                    // Check if troop can attack based on attack speed
+                    // Check attack cooldown
                     const now = Date.now();
                     if (!troop.lastAttackTime || (now - troop.lastAttackTime) >= (1000 / troopStats.attackSpeed)) {
                         troop.lastAttackTime = now;
 
-                        if (target.type === 'base') {
-                            opponent.baseHealth -= Math.ceil(troopStats.attack / 10);
+                        if (troop.currentTargetType === 'base') {
+                            // Attack enemy base
+                            opponent.baseHealth -= Math.ceil(troopStats.attack / 1);
                             if (opponent.baseHealth <= 0) {
                                 endGame(gameId, playerId);
                             }
-                        } else if (opponent.troops && Array.isArray(opponent.troops)) {
-                            const enemyTroopIndex = opponent.troops.findIndex(t => t && t.id === target.id);
+                        } else if (troop.currentTargetType === 'troop') {
+                            // Attack enemy troop
+                            const enemyTroopIndex = opponent.troops.findIndex(t => t && t.id === troop.currentTarget);
                             if (enemyTroopIndex !== -1) {
                                 opponent.troops[enemyTroopIndex].health -= troopStats.attack;
                             }
@@ -170,24 +203,7 @@ function startGameLoop(gameId) {
                     // Move towards target
                     troop.attacking = false;
 
-                    let targetPosition;
-                    if (target) {
-                        if (target.type === 'base') {
-                            targetPosition = opponent.basePosition;
-                        } else if (opponent.troops && Array.isArray(opponent.troops)) {
-                            const targetTroop = opponent.troops.find(t => t && t.id === target.id);
-                            if (targetTroop) {
-                                targetPosition = targetTroop.position;
-                            }
-                        }
-                    }
-
-                    // If no valid target found, move towards enemy base
-                    if (!targetPosition) {
-                        targetPosition = opponent.basePosition;
-                    }
-
-                    // Move towards target
+                    // Calculate direction
                     const dx = targetPosition.x - troop.position.x;
                     const dy = targetPosition.y - troop.position.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -205,7 +221,6 @@ function startGameLoop(gameId) {
 
     }, 100); // Update 10 times per second
 }
-
 function calculateDistance(pos1, pos2) {
     if (!pos1 || !pos2) return Infinity;
     const dx = pos1.x - pos2.x;
@@ -290,10 +305,6 @@ io.on('connection', (socket) => {
             console.log("Card not found");
             return;
         }
-
-        // REMOVED: Check cooldown first
-        // We're now relying solely on the mana system
-
         // Check if player has enough mana
         if (player.mana < card.manaCost) {
             console.log("Not enough mana to play this card");
@@ -304,9 +315,6 @@ io.on('connection', (socket) => {
         // Deduct mana cost
         player.mana -= card.manaCost;
 
-        // REMOVED: Apply cooldown
-        // card.cooldown = CARD_COOLDOWN;
-
         // Get troop type from card
         const troopType = card.troopType;
         const troopStats = troopConfig.getTroopConfigByTypeId(troopType);
@@ -315,7 +323,6 @@ io.on('connection', (socket) => {
         const troopId = `troop_${socket.id}_${Date.now()}`;
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
 
-        // Randomize spawn position slightly around the base
         const spawnPos = {
             x: player.basePosition.x + (Math.random() * 280 - 40),
             y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
@@ -327,7 +334,9 @@ io.on('connection', (socket) => {
             position: spawnPos,
             health: troopStats.health,
             attacking: false,
-            lastAttackTime: 0
+            lastAttackTime: 0,
+            currentTarget: null,     // Add this property
+            currentTargetType: null  // Add this property
         };
 
         player.troops.push(newTroop);
