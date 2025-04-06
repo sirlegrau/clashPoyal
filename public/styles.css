@@ -51,6 +51,11 @@ body {
     height: calc(100% - 140px); /* Space for cards */
     background-color: #ecf0f1;
     z-index: 1;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border: 1px solid #ccc;
 }
 
 /* Card Container fixed to bottom */
@@ -69,12 +74,11 @@ body {
     z-index: 10; /* Ensure cards are above everything */
 }
 
-/* Card Styles - Made bigger */
+/* Card Styles */
 .card {
     position: relative;
     width: 110px;
     height: 120px;
-    background-color: #3498db;
     border-radius: 10px;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
     display: flex;
@@ -84,7 +88,7 @@ body {
     color: white;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
 }
 
@@ -93,29 +97,41 @@ body {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
+.card-played {
+    transform: scale(0.6) translateY(20px);
+    opacity: 0;
+}
+
+.card-new {
+    animation: cardDraw 0.4s ease-out;
+}
+
+@keyframes cardDraw {
+    0% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Card content styling */
 .card-image {
-    width: 85%;
-    height: 65%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 5px;
+    position: relative;
+    width: 100%;
+    height: 70%;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    background-color: #34495e;
 }
 
 .card-image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-.card-cooldown {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 100%;
-    height: 0%;
-    background-color: rgba(0, 0, 0, 0.5);
-    transition: height 0.3s ease;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
 /* Health Bars */
@@ -198,66 +214,7 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .card {
-        width: 90px;
-        height: 100px;
-    }
-
-    .health-bar {
-        width: 150px;
-        height: 15px;
-    }
-
-    #player-health-bar {
-        bottom: 150px; /* Keep fixed distance from bottom */
-        left: 10px;
-    }
-
-    #opponent-health-bar {
-        right: 10px;
-    }
-}
-
-@media (max-height: 600px) {
-    .card-container {
-        height: 120px;
-    }
-
-    #game-canvas {
-        height: calc(100% - 120px);
-    }
-
-    .card {
-        width: 80px;
-        height: 90px;
-    }
-
-    #player-health-bar {
-        bottom: 130px;
-    }
-}
-
-/* Extra small screens */
-@media (max-height: 450px) {
-    .card-container {
-        height: 100px;
-    }
-
-    #game-canvas {
-        height: calc(100% - 100px);
-    }
-
-    .card {
-        width: 70px;
-        height: 80px;
-    }
-
-    #player-health-bar {
-        bottom: 110px;
-    }
-}
+/* Mana System */
 .mana-container {
     padding: 15px;
     background-color: rgba(0, 0, 0, 0.4);
@@ -314,8 +271,8 @@ button:hover {
     position: absolute;
     top: 5px;
     right: 5px;
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
     background-color: #3498db;
     color: white;
     border-radius: 50%;
@@ -323,53 +280,23 @@ button:hover {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 16px;
-    box-shadow: 0 0 8px rgba(52, 152, 219, 0.8);
-    z-index: 5;
+    font-size: 14px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Troop type label */
 .troop-type {
     position: absolute;
-    bottom: 5px;
+    bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
+    padding: 5px 0;
+    background-color: rgba(41, 128, 185, 0.8);
+    color: white;
     text-align: center;
-    color: white;
+    font-weight: bold;
     font-size: 12px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px black;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 3px 0;
-}
-
-/* Existing card styles */
-.card {
-    position: relative;
-    width: 110px;
-    height: 120px;
-    background-color: #3498db;
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    overflow: hidden;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
-}
-
-/* Hidden cooldown element - we're not using it anymore */
-.card-cooldown {
-    display: none;
 }
 
 /* Soldier card */
@@ -385,4 +312,93 @@ button:hover {
 /* Tank card */
 .card[data-troop-type="tank"] {
     background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+/* Game notification */
+.game-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50px);
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.game-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.game-notification.error {
+    background-color: rgba(231, 76, 60, 0.9);
+}
+
+.game-notification.success {
+    background-color: rgba(46, 204, 113, 0.9);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card {
+        width: 90px;
+        height: 100px;
+    }
+
+    .health-bar {
+        width: 150px;
+        height: 15px;
+    }
+
+    #player-health-bar {
+        bottom: 150px;
+        left: 10px;
+    }
+
+    #opponent-health-bar {
+        right: 10px;
+    }
+}
+
+@media (max-height: 600px) {
+    .card-container {
+        height: 120px;
+    }
+
+    #game-canvas {
+        height: calc(100% - 120px);
+    }
+
+    .card {
+        width: 80px;
+        height: 90px;
+    }
+
+    #player-health-bar {
+        bottom: 130px;
+    }
+}
+
+/* Extra small screens */
+@media (max-height: 450px) {
+    .card-container {
+        height: 100px;
+    }
+
+    #game-canvas {
+        height: calc(100% - 100px);
+    }
+
+    .card {
+        width: 70px;
+        height: 80px;
+    }
+
+    #player-health-bar {
+        bottom: 110px;
+    }
 }

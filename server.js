@@ -18,11 +18,29 @@ const BASE_HEALTH = 100;
 // Game state
 const games = {};
 const playerQueue = [];
-const rendCards = [
-    { id: 'card1', cooldown: 0, troopType: 'soldier', manaCost: 2 },
-    { id: 'card2', cooldown: 0, troopType: 'archer', manaCost: 5 },
-    { id: 'card3', cooldown: 0, troopType: 'tank', manaCost: 8 }
-]
+const CARD_POOL = [
+    { id: 'card1',troopType: 'soldier', manaCost: 2 },
+    { id: 'card2',troopType: 'archer', manaCost: 5 },
+    { id: 'card3',troopType: 'tank', manaCost: 8 },
+    { id: 'card4',troopType: 'berserker', manaCost: 4 },
+    { id: 'card5',troopType: 'knight', manaCost: 6 },
+    { id: 'card6',troopType: 'mage', manaCost: 7 }
+];
+
+function getInitialCards() {
+    // Shuffle and get first 3 cards
+    return shuffleArray([...CARD_POOL]).slice(0, 3);
+}
+
+// Add this shuffle function
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 function createGame(player1Id, player2Id) {
     const gameId = `game_${Date.now()}`;
 
@@ -37,7 +55,7 @@ function createGame(player1Id, player2Id) {
                 mana: 5, // Starting mana
                 maxMana: 10, // Maximum mana
                 lastManaUpdateTime: Date.now(),
-                cards: rendCards
+                cards: getInitialCards()
             },
             [player2Id]: {
                 id: player2Id,
@@ -47,7 +65,7 @@ function createGame(player1Id, player2Id) {
                 mana: 5, // Starting mana
                 maxMana: 10, // Maximum mana
                 lastManaUpdateTime: Date.now(),
-                cards: rendCards
+                cards: getInitialCards()
             }
         },
         active: true
@@ -119,37 +137,12 @@ function startGameLoop(gameId) {
 
                 const troopStats = troopConfig.getTroopConfigByTypeId(troop.type);
 
-                // If troop doesn't have a target yet, find the closest target
-                if (!troop.currentTarget) {
-                    let minDistance = Infinity;
-
-                    // Check distance to enemy base
-                    const distToBase = calculateDistance(troop.position, opponent.basePosition);
-                    if (distToBase < minDistance) {
-                        minDistance = distToBase;
-                        troop.currentTarget = opponentId;
-                        troop.currentTargetType = 'base';
-                    }
-
-                    // Check distance to enemy troops
-                    opponent.troops.forEach(enemyTroop => {
-                        if (!enemyTroop || !enemyTroop.position || enemyTroop.health <= 0) return;
-
-                        const dist = calculateDistance(troop.position, enemyTroop.position);
-                        if (dist < minDistance) {
-                            minDistance = dist;
-                            troop.currentTarget = enemyTroop.id;
-                            troop.currentTargetType = 'troop';
-                        }
-                    });
-                }
-
-                // Get target position
+                // Modified targeting logic
                 let targetPosition;
                 let targetExists = false;
 
-                if (troop.currentTargetType === 'base') {
-                    // Base always exists
+                if (troop.attacking && troop.currentTargetType === 'base') {
+                    // If already attacking the base, don't change targets
                     targetExists = true;
                     targetPosition = opponent.basePosition;
                 } else if (troop.currentTargetType === 'troop') {
@@ -162,14 +155,39 @@ function startGameLoop(gameId) {
                         // Target troop is dead, clear target to find a new one
                         troop.currentTarget = null;
                         troop.currentTargetType = null;
-                        // Default to enemy base until we find a new target
-                        targetPosition = opponent.basePosition;
+                        // We'll find a new target below
                     }
                 }
 
-                // If no target is set, use enemy base as default
-                if (!targetPosition) {
-                    targetPosition = opponent.basePosition;
+                // If not locked onto a target yet, find the closest
+                if (!targetExists) {
+                    let minDistance = Infinity;
+
+                    // Check distance to enemy troops first
+                    let closestTroop = null;
+                    opponent.troops.forEach(enemyTroop => {
+                        if (!enemyTroop || !enemyTroop.position || enemyTroop.health <= 0) return;
+
+                        const dist = calculateDistance(troop.position, enemyTroop.position);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestTroop = enemyTroop;
+                        }
+                    });
+
+                    // If an enemy troop is in range, target it
+                    if (closestTroop && minDistance <= troopStats.range * 2.66) {
+                        targetExists = true;
+                        targetPosition = closestTroop.position;
+                        troop.currentTarget = closestTroop.id;
+                        troop.currentTargetType = 'troop';
+                    } else {
+                        // Otherwise, target the enemy base
+                        targetExists = true;
+                        targetPosition = opponent.basePosition;
+                        troop.currentTarget = opponentId;
+                        troop.currentTargetType = 'base';
+                    }
                 }
 
                 // Calculate distance to target
@@ -284,6 +302,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    function drawNewCard() {
+        // Return a random card from the pool
+        return CARD_POOL[Math.floor(Math.random() * CARD_POOL.length)];
+    }
     // Player played a card
     socket.on('playCard', ({ gameId, cardIndex }) => {
         console.log(`Player ${socket.id} played card ${cardIndex} in game ${gameId}`);
@@ -324,7 +346,7 @@ io.on('connection', (socket) => {
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
 
         const spawnPos = {
-            x: player.basePosition.x + (Math.random() * 280 - 40),
+            x: player.basePosition.x + (Math.random() * 300 - 40),
             y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
         };
 
@@ -335,16 +357,18 @@ io.on('connection', (socket) => {
             health: troopStats.health,
             attacking: false,
             lastAttackTime: 0,
-            currentTarget: null,     // Add this property
-            currentTargetType: null  // Add this property
+            currentTarget: null,
+            currentTargetType: null
         };
 
         player.troops.push(newTroop);
 
+        // Draw a new card to replace the played one
+        player.cards[cardIndex] = drawNewCard();
+
         // Send immediate update to make spawning feel responsive
         io.to(gameId).emit('gameState', game);
-    });
-    // Handle disconnection
+    });  // Handle disconnection
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);
 

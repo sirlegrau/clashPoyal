@@ -42,6 +42,48 @@ const troopTypes = {
         manaCost: 5,    // mana cost to play this troop
         imageUrl: 'assets/archer.png',
         description: 'Ranged unit with high attack range'
+    },
+
+    // Berserker - medium health, high attack, low range
+    berserker: {
+        id: 'berserker',
+        health: 12,
+        attack: 4,
+        range: 40,
+        speed: 15,      // fast
+        attackSpeed: 1.5, // attacks faster
+        cost: 2,
+        manaCost: 4,    // mana cost to play this troop
+        imageUrl: 'assets/berserker.png',
+        description: 'Fast melee unit with high damage'
+    },
+
+    // Knight - high health, high attack, medium range
+    knight: {
+        id: 'knight',
+        health: 18,
+        attack: 3,
+        range: 60,
+        speed: 8,
+        attackSpeed: 0.8, // slower attack
+        cost: 3,
+        manaCost: 6,    // mana cost to play this troop
+        imageUrl: 'assets/knight.png',
+        description: 'Strong melee unit with good health and damage'
+    },
+
+    // Mage - very low health, high range, high damage
+    mage: {
+        id: 'mage',
+        health: 6,
+        attack: 5,
+        range: 250,
+        speed: 4,
+        attackSpeed: 0.7, // slower attack
+        cost: 3,
+        manaCost: 7,    // mana cost to play this troop
+        imageUrl: 'assets/mage.png',
+        description: 'Powerful ranged unit with high damage but low health'
     }
 };
 
@@ -49,7 +91,10 @@ const troopTypes = {
 const cardTroopMapping = {
     'card1': troopTypes.soldier,
     'card2': troopTypes.archer,
-    'card3': troopTypes.tank
+    'card3': troopTypes.tank,
+    'card4': troopTypes.berserker,
+    'card5': troopTypes.knight,
+    'card6': troopTypes.mage
 };
 
 // Export configurations
@@ -71,4 +116,5 @@ module.exports = {
     getManaCost: function(typeId) {
         return troopTypes[typeId]?.manaCost || 1; // Default to 1
     }
+
 };
