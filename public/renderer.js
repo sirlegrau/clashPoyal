@@ -46,15 +46,6 @@ function updateUI() {
                     cards[index].appendChild(manaCostLabel);
                 }
                 manaCostLabel.textContent = card.manaCost;
-
-                // Add or update troop type label
-                let troopLabel = cards[index].querySelector('.troop-type');
-                if (!troopLabel) {
-                    troopLabel = document.createElement('div');
-                    troopLabel.className = 'troop-type';
-                    cards[index].appendChild(troopLabel);
-                }
-                troopLabel.textContent = card.troopType.charAt(0).toUpperCase() + card.troopType.slice(1);
             }
 
             // Visual feedback for available cards - only based on mana now
