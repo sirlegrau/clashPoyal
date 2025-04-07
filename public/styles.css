@@ -48,7 +48,6 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: calc(100%); /* Space for cards */
     background-color: #ecf0f1;
     z-index: 1;
     image-rendering: -moz-crisp-edges;
@@ -356,9 +355,6 @@ button:hover {
         height: 120px;
     }
 
-    #game-canvas {
-        height: calc(100%);
-    }
 
     .card {
         width: 80px;
@@ -382,9 +378,7 @@ button:hover {
         height: 100px;
     }
 
-    #game-canvas {
-        height: calc(100%);
-    }
+
 
     .card {
         width: 70px;

@@ -190,7 +190,7 @@
 
         // Apply scale using CSS
         canvas.style.width = `${INTERNAL_WIDTH * scale}px`;
-        canvas.style.height = `${INTERNAL_HEIGHT * scale}px`;
+        canvas.style.height = `${availableHeight}px`;
 
         // Center the canvas horizontally
         canvas.style.position = 'absolute';
