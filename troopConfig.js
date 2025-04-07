@@ -1,5 +1,51 @@
 // troopConfig.js
+const playerTroopLevels = {};
 
+// Initialize player troop levels
+function initializePlayerTroopLevels(playerId) {
+    if (!playerTroopLevels[playerId]) {
+        playerTroopLevels[playerId] = {
+            escroto: 0,
+            tank: 0,
+            archer: 0,
+            berserker: 0,
+            knight: 0,
+            mage: 0
+        };
+    }
+    return playerTroopLevels[playerId];
+}
+
+// Level up a specific troop type for a player
+function levelUpTroop(playerId, troopType) {
+    if (!playerTroopLevels[playerId]) {
+        initializePlayerTroopLevels(playerId);
+    }
+
+    // Increase the level
+    playerTroopLevels[playerId][troopType]++;
+
+    return playerTroopLevels[playerId][troopType];
+}
+
+// Get the current level for a troop type
+function getTroopLevel(playerId, troopType) {
+    if (!playerTroopLevels[playerId]) {
+        initializePlayerTroopLevels(playerId);
+    }
+
+    return playerTroopLevels[playerId][troopType] || 1;
+}
+
+// Calculate stats with level bonuses (10% per level)
+function getScaledTroopStat(baseStat, level) {
+    // Level 1 is base stats
+    if (level <= 1) return baseStat;
+
+    // Each level above 1 gives +10% to stats
+    const levelMultiplier = 1 + ((level - 1) * 0.1);
+    return baseStat * levelMultiplier;
+}
 // Configuration for all troop types
 const troopTypes = {
     // Regular soldier - balanced stats
@@ -101,6 +147,10 @@ const cardTroopMapping = {
 module.exports = {
     troopTypes,
     cardTroopMapping,
+    initializePlayerTroopLevels,
+    levelUpTroop,
+    getTroopLevel,
+    getScaledTroopStat,
 
     // Method to get troop config by card ID
     getTroopConfigByCardId: function(cardId) {

@@ -186,11 +186,19 @@ function startGameLoop(gameId) {
                 }
             }
 
+            // Replace the troop update code in the gameLoop with this version
+// Find the section in startGameLoop function in server.js that updates troops
+
+// Update each troop
             // Update each troop
             player.troops.forEach(troop => {
                 if (!troop || !troop.position) return;
 
-                const troopStats = troopConfig.getTroopConfigByTypeId(troop.type);
+                // Use troop's own stats if available (from level scaling)
+                const troopAttack = troop.attack || troopConfig.getTroopConfigByTypeId(troop.type).attack;
+                const troopRange = troop.range || troopConfig.getTroopConfigByTypeId(troop.type).range;
+                const troopSpeed = troop.speed || troopConfig.getTroopConfigByTypeId(troop.type).speed;
+                const troopAttackSpeed = troop.attackSpeed || troopConfig.getTroopConfigByTypeId(troop.type).attackSpeed;
 
                 // Modified targeting logic
                 let targetPosition;
@@ -231,7 +239,7 @@ function startGameLoop(gameId) {
                     });
 
                     // If an enemy troop is in range, target it
-                    if (closestTroop && minDistance <= troopStats.range * 2.66) {
+                    if (closestTroop && minDistance <= troopRange * 2.66) {
                         targetExists = true;
                         targetPosition = closestTroop.position;
                         troop.currentTarget = closestTroop.id;
@@ -249,18 +257,18 @@ function startGameLoop(gameId) {
                 const distanceToTarget = calculateDistance(troop.position, targetPosition);
 
                 // Attack or move
-                if (targetExists && distanceToTarget <= troopStats.range) {
+                if (targetExists && distanceToTarget <= troopRange) {
                     // In range to attack
                     troop.attacking = true;
 
                     // Check attack cooldown
                     const now = Date.now();
-                    if (!troop.lastAttackTime || (now - troop.lastAttackTime) >= (1000 / troopStats.attackSpeed)) {
+                    if (!troop.lastAttackTime || (now - troop.lastAttackTime) >= (1000 / troopAttackSpeed)) {
                         troop.lastAttackTime = now;
 
                         if (troop.currentTargetType === 'base') {
                             // Attack enemy base
-                            opponent.baseHealth -= Math.ceil(troopStats.attack / 2);
+                            opponent.baseHealth -= Math.ceil(troopAttack / 2);
                             if (opponent.baseHealth <= 0) {
                                 endGame(gameId, playerId);
                             }
@@ -268,7 +276,7 @@ function startGameLoop(gameId) {
                             // Attack enemy troop
                             const enemyTroopIndex = opponent.troops.findIndex(t => t && t.id === troop.currentTarget);
                             if (enemyTroopIndex !== -1) {
-                                opponent.troops[enemyTroopIndex].health -= troopStats.attack;
+                                opponent.troops[enemyTroopIndex].health -= troopAttack;
                             }
                         }
                     }
@@ -282,8 +290,8 @@ function startGameLoop(gameId) {
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance > 0) {
-                        troop.position.x += (dx / distance) * troopStats.speed;
-                        troop.position.y += (dy / distance) * troopStats.speed;
+                        troop.position.x += (dx / distance) * troopSpeed;
+                        troop.position.y += (dy / distance) * troopSpeed;
                     }
                 }
             });
@@ -358,7 +366,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Player played a card
+    // Add this to server.js in the 'playCard' socket handler
+
+// Player played a card
+    // In server.js, modify the 'playCard' socket handler where stats are calculated
+
     socket.on('playCard', ({ gameId, cardIndex }) => {
         console.log(`Player ${socket.id} played card ${cardIndex} in game ${gameId}`);
 
@@ -392,7 +404,21 @@ io.on('connection', (socket) => {
 
         // Get troop type from card
         const troopType = card.troopType;
-        const troopStats = troopConfig.getTroopConfigByTypeId(troopType);
+
+        // LEVEL UP the troop type for this player
+        const newLevel = troopConfig.levelUpTroop(socket.id, troopType);
+        console.log(`Player ${socket.id} leveled up ${troopType} to level ${newLevel}`);
+
+        // Get base troop stats
+        const baseTroopStats = troopConfig.getTroopConfigByTypeId(troopType);
+
+        // Calculate level-scaled stats with 10% bonus per level
+        // BUT DON'T scale range - keep it at base value
+        const health = troopConfig.getScaledTroopStat(baseTroopStats.health, newLevel);
+        const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, newLevel);
+        const range = baseTroopStats.range; // Keep range constant regardless of level
+        const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, newLevel);
+        const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, newLevel);
 
         // Spawn a troop near the player's base
         const troopId = `troop_${socket.id}_${Date.now()}`;
@@ -406,8 +432,14 @@ io.on('connection', (socket) => {
         const newTroop = {
             id: troopId,
             type: troopType,
+            level: newLevel, // Store the level
             position: spawnPos,
-            health: troopStats.health,
+            health: health,
+            maxHealth: health, // Add maxHealth to track percentage correctly
+            attack: attack,
+            range: range,
+            speed: speed,
+            attackSpeed: attackSpeed,
             attacking: false,
             lastAttackTime: 0,
             currentTarget: null,
@@ -415,7 +447,7 @@ io.on('connection', (socket) => {
         };
 
         player.troops.push(newTroop);
-
+        console.log(newTroop);
         // Store the played card's ID before replacing it
         const playedCardId = card.id;
 
