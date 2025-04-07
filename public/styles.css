@@ -48,7 +48,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% - 140px); /* Space for cards */
+    height: calc(100%); /* Space for cards */
     background-color: #ecf0f1;
     z-index: 1;
     image-rendering: -moz-crisp-edges;
@@ -383,7 +383,7 @@ button:hover {
     }
 
     #game-canvas {
-        height: calc(100% - 10px);
+        height: calc(100%);
     }
 
     .card {
