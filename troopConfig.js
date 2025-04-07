@@ -78,7 +78,7 @@ const troopTypes = {
     // Tank - high health, low speed, medium damage
     tank: {
         id: 'tank',
-        health: 40,
+        health: 45,
         attack: 2,
         range: 40,
         speed: 3,
@@ -172,7 +172,7 @@ const troopTypes = {
         id: 'lapiz',
         health: 20,
         attack: 1,
-        range: 225,
+        range: 350,
         speed: 0.166,
         attackSpeed: 1.66, // slower attack
         cost: 6,

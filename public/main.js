@@ -448,7 +448,13 @@
                     description.textContent = 'Vacía los testículos al completo con una gran salpicadura lechosa.';
                     break;
                 case 'shuffler':
-                    description.textContent = 'Baile de pitos, consigue 3 poyas aleatorias.';
+                    description.textContent = 'Baile de pitos, consigue 4 poyas aleatorias.';
+                    break;
+                case 'flacido':
+                    description.textContent = 'La unión hace la fuerza y 3 no son multidud';
+                    break;
+                case 'lapiz':
+                    description.textContent = 'jaja poya lapiz';
                     break;
                 default:
                     description.textContent = 'A mysterious troop with unknown abilities.';

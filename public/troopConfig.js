@@ -11,8 +11,8 @@ const TROOP_CONFIG = {
             attackColor: '#f39c12'
         },
         tank: {
-            maxHealth: 40,
-            size: 170,
+            maxHealth: 45,
+            size: 190,
             playerColor: '#7f8c8d',
             enemyColor: '#cd6155',
             attackColor: '#e74c3c'
@@ -61,7 +61,7 @@ const TROOP_CONFIG = {
         },
         lapiz: {
             maxHealth: 20,
-            size: 100,
+            size: 130,
             playerColor: '#9b59b6',
             enemyColor: '#8e44ad',
             attackColor: '#8e44ad'
