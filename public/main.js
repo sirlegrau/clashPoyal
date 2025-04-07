@@ -450,7 +450,7 @@
                 case 'shuffler':
                     description.textContent = 'Baile de pitos, consigue 4 poyas aleatorias.';
                     break;
-                case 'flacido':
+                case 'flacidos':
                     description.textContent = 'La unión hace la fuerza y 3 no son multidud';
                     break;
                 case 'lapiz':
