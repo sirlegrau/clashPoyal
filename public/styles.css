@@ -357,7 +357,7 @@ button:hover {
     }
 
     #game-canvas {
-        height: calc(100% - 20);
+        height: calc(100%);
     }
 
     .card {
