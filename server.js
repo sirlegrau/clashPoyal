@@ -26,11 +26,15 @@ const CARD_POOL = [
     { id: 'card4', troopType: 'berserker', manaCost: 4 },
     { id: 'card5', troopType: 'knight', manaCost: 3 },
     { id: 'card6', troopType: 'mage', manaCost: 7 },
-    { id: 'card7', troopType: 'shuffler', manaCost: 0 }
+    { id: 'card7', troopType: 'shuffler', manaCost: 0 },
+    { id: 'card8', troopType: 'flacidos', manaCost: 5 },
+    { id: 'card9', troopType: 'lapiz', manaCost: 6 }
+
+
 ];
 
 function getInitialCards() {
-    return Array(3).fill({ id: 'card1', troopType: 'escroto', manaCost: 1 });
+    return Array(4).fill({ id: 'card1', troopType: 'escroto', manaCost: 1 });
 }
 
 function drawNewCard(playedCardId) {
@@ -46,7 +50,7 @@ function getThreeRandomCards(lastPlayedCardId = null) {
     // Generate 3 random cards from the available pool
     const randomCards = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
         const randomIndex = Math.floor(Math.random() * availableCards.length);
         randomCards.push(availableCards[randomIndex]);
     }
@@ -357,36 +361,71 @@ io.on('connection', (socket) => {
 
         const troopId = `troop_${socket.id}_${Date.now()}`;
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
+        if (troopType === 'flacidos') {
+            // Create 3 troops instead of 1
+            for (let i = 0; i < 3; i++) {
+                const troopId = `troop_${socket.id}_${Date.now()}_${i}`;
 
-        const spawnPos = {
-            x: player.basePosition.x + (Math.random() * 300 - 40),
-            y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
-        };
+                // Create different spawn positions for each troop
+                const offsetX = (i - 1) * 80; // -80, 0, 80 spacing
+                const spawnPos = {
+                    x: player.basePosition.x + offsetX + (Math.random() * 40 - 20), // Add a little randomness
+                    y: player.basePosition.y + (isFirstPlayer ? -50 : 50) + (Math.random() * 30 - 15)
+                };
 
-        const newTroop = {
-            id: troopId,
-            type: troopType,
-            level: newLevel,
-            position: spawnPos,
-            health: health,
-            maxHealth: health,
-            attack: attack,
-            range: range,
-            speed: speed,
-            attackSpeed: attackSpeed,
-            attacking: false,
-            lastAttackTime: 0,
-            currentTarget: null,
-            currentTargetType: null
-        };
+                const newTroop = {
+                    id: troopId,
+                    type: troopType,
+                    level: newLevel,
+                    position: spawnPos,
+                    health: health,
+                    maxHealth: health,
+                    attack: attack,
+                    range: range,
+                    speed: speed,
+                    attackSpeed: attackSpeed,
+                    attacking: false,
+                    lastAttackTime: 0,
+                    currentTarget: null,
+                    currentTargetType: null
+                };
 
-        player.troops.push(newTroop);
-        console.log(newTroop);
+                player.troops.push(newTroop);
+                console.log(`Spawned flacidos troop ${i+1}/3:`, newTroop);
+            }
+        } else {
+            // Original code for other troop types (spawns 1 troop)
+            const troopId = `troop_${socket.id}_${Date.now()}`;
+            const spawnPos = {
+                x: player.basePosition.x + (Math.random() * 300 - 40),
+                y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
+            };
+
+            const newTroop = {
+                id: troopId,
+                type: troopType,
+                level: newLevel,
+                position: spawnPos,
+                health: health,
+                maxHealth: health,
+                attack: attack,
+                range: range,
+                speed: speed,
+                attackSpeed: attackSpeed,
+                attacking: false,
+                lastAttackTime: 0,
+                currentTarget: null,
+                currentTargetType: null
+            };
+
+            player.troops.push(newTroop);
+            console.log(newTroop);
+        }
 
         const playedCardId = card.id;
         if (playedCardId !== 'card7'){
             player.cards[cardIndex] = drawNewCard(playedCardId);
-        }else{
+        } else {
             player.cards = getThreeRandomCards(playedCardId);
         }
 

@@ -5,49 +5,63 @@ const TROOP_CONFIG = {
     types: {
         escroto: {
             maxHealth: 2,
-            size: 70,
+            size: 80,
             playerColor: '#2980b9',
             enemyColor: '#c0392b',
             attackColor: '#f39c12'
         },
         tank: {
             maxHealth: 40,
-            size: 150,
+            size: 170,
             playerColor: '#7f8c8d',
             enemyColor: '#cd6155',
             attackColor: '#e74c3c'
         },
         archer: {
             maxHealth: 7,
-            size: 85,
+            size: 95,
             playerColor: '#3498db',
             enemyColor: '#e67e22',
             attackColor: '#9b59b6'
         },
         berserker: {
             maxHealth: 15,
-            size: 90,
+            size: 110,
             playerColor: '#e74c3c',
             enemyColor: '#d35400',
             attackColor: '#c0392b'
         },
         knight: {
             maxHealth: 18,
-            size: 100,
+            size: 120,
             playerColor: '#f39c12',
             enemyColor: '#b9770e',
             attackColor: '#d35400'
         },
         mage: {
             maxHealth: 6,
-            size: 80,
+            size: 100,
             playerColor: '#9b59b6',
             enemyColor: '#8e44ad',
             attackColor: '#8e44ad'
         },
         shuffler: {
             maxHealth: 0,
-            size: 80,
+            size: 100,
+            playerColor: '#9b59b6',
+            enemyColor: '#8e44ad',
+            attackColor: '#8e44ad'
+        },
+        flacidos: {
+            maxHealth: 0,
+            size: 100,
+            playerColor: '#9b59b6',
+            enemyColor: '#8e44ad',
+            attackColor: '#8e44ad'
+        },
+        lapiz: {
+            maxHealth: 20,
+            size: 100,
             playerColor: '#9b59b6',
             enemyColor: '#8e44ad',
             attackColor: '#8e44ad'

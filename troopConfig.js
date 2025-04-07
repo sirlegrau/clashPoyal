@@ -10,7 +10,9 @@ function initializePlayerTroopLevels(playerId) {
             archer: 0,
             berserker: 0,
             knight: 0,
-            mage: 0
+            mage: 0,
+            flacidos:0,
+            lapiz:0
         };
     }
     return playerTroopLevels[playerId];
@@ -153,6 +155,30 @@ const troopTypes = {
         manaCost: 0,    // mana cost to play this troop
         imageUrl: 'assets/shuffler.png',
         description: 'Powerful ranged unit with high damage but low health'
+    },
+    flacidos: {
+        id: 'flacidos',
+        health: 4,
+        attack: 2,
+        range: 50,
+        speed: 7,
+        attackSpeed: 1.5, // slower attack
+        cost: 5,
+        manaCost: 5,    // mana cost to play this troop
+        imageUrl: 'assets/flacidos.png',
+        description: 'Powerful ranged unit with high damage but low health'
+    },
+    lapiz: {
+        id: 'lapiz',
+        health: 20,
+        attack: 1,
+        range: 225,
+        speed: 0.166,
+        attackSpeed: 1.66, // slower attack
+        cost: 6,
+        manaCost: 6,    // mana cost to play this troop
+        imageUrl: 'assets/lapiz.png',
+        description: 'Powerful ranged unit with high damage but low health'
     }
 
 };
@@ -166,6 +192,7 @@ const cardTroopMapping = {
     'card5': troopTypes.knight,
     'card6': troopTypes.mage,
     'card7': troopTypes.shuffler,
+    'card8': troopTypes.flacidos
 };
 
 // Export configurations
