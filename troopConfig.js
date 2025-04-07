@@ -39,12 +39,23 @@ function getTroopLevel(playerId, troopType) {
 
 // Calculate stats with level bonuses (10% per level)
 function getScaledTroopStat(baseStat, level) {
-    // Level 1 is base stats
-    if (level <= 1) return baseStat;
+    // Base case - level 1 returns the base stat
+    if (level <= 1) {
+        return Math.floor(baseStat * 100) / 100;
+    }
 
-    // Each level above 1 gives +10% to stats
-    const levelMultiplier = 1 + ((level - 1) * 0.1);
-    return baseStat * levelMultiplier;
+    let scaledStat = baseStat;
+
+    // Apply scaling for each level above 1
+    for (let i = 2; i <= level; i++) {
+        // Calculate percentage for this level (10% + (i-2)*1%)
+        let percentage = 10 + (i - 2);
+        let increase = baseStat * (percentage / 100);
+        scaledStat += increase;
+    }
+
+    // Round down to 2 decimal places
+    return Math.floor(scaledStat * 100) / 100;
 }
 // Configuration for all troop types
 const troopTypes = {
@@ -130,7 +141,20 @@ const troopTypes = {
         manaCost: 7,    // mana cost to play this troop
         imageUrl: 'assets/mage.png',
         description: 'Powerful ranged unit with high damage but low health'
+    },
+    shuffler: {
+        id: 'shuffler',
+        health: 0,
+        attack: 0,
+        range: 0,
+        speed: 0,
+        attackSpeed: 0, // slower attack
+        cost: 0,
+        manaCost: 0,    // mana cost to play this troop
+        imageUrl: 'assets/shuffler.png',
+        description: 'Powerful ranged unit with high damage but low health'
     }
+
 };
 
 // Map card IDs to troop types
@@ -140,7 +164,8 @@ const cardTroopMapping = {
     'card3': troopTypes.tank,
     'card4': troopTypes.berserker,
     'card5': troopTypes.knight,
-    'card6': troopTypes.mage
+    'card6': troopTypes.mage,
+    'card7': troopTypes.shuffler,
 };
 
 // Export configurations

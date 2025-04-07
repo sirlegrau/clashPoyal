@@ -44,7 +44,15 @@ const TROOP_CONFIG = {
             playerColor: '#9b59b6',
             enemyColor: '#8e44ad',
             attackColor: '#8e44ad'
+        },
+        shuffler: {
+            maxHealth: 0,
+            size: 80,
+            playerColor: '#9b59b6',
+            enemyColor: '#8e44ad',
+            attackColor: '#8e44ad'
         }
+
     },
 
     // Helper functions for accessing troop data

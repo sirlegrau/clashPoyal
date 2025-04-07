@@ -345,7 +345,7 @@
     
         // Add custom styles
         addCustomStyles();
-    
+        setupModal();
         // Set up canvas
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -363,4 +363,107 @@
             x: (event.clientX - rect.left) / scale,
             y: (event.clientY - rect.top) / scale
         };
+    }
+    function setupModal() {
+        const poyeriaBtn = document.getElementById('poyeria-btn');
+        const cardModal = document.getElementById('card-modal');
+        const closeModal = document.querySelector('.close-modal');
+
+        // Open modal when Poyería button is clicked
+        poyeriaBtn.addEventListener('click', () => {
+            cardModal.style.display = 'block';
+        });
+
+        // Close modal when X is clicked
+        closeModal.addEventListener('click', () => {
+            cardModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside the modal content
+        window.addEventListener('click', (event) => {
+            if (event.target === cardModal) {
+                cardModal.style.display = 'none';
+            }
+        });
+        generateCardCatalog();
+    }
+    function generateCardCatalog() {
+        const cardCatalog = document.querySelector('.card-catalog');
+
+        // Clear existing cards
+        cardCatalog.innerHTML = '';
+
+        // Get all troop types from TROOP_CONFIG
+        Object.keys(TROOP_CONFIG.types).forEach(troopType => {
+            const troopData = TROOP_CONFIG.types[troopType];
+
+            // Create card element
+            const card = document.createElement('div');
+            card.className = 'catalog-card';
+
+            // Create image container
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'catalog-card-image';
+
+            // Create image element
+            const image = document.createElement('img');
+            image.src = `assets/${troopType}.png`;
+            image.alt = troopType;
+            image.onerror = () => {
+                // Fallback if image doesn't load
+                image.src = 'assets/troop.png';
+            };
+
+            // Create info container
+            const infoContainer = document.createElement('div');
+            infoContainer.className = 'catalog-card-info';
+
+            // Create heading
+            const heading = document.createElement('h3');
+            heading.textContent = troopType.charAt(0).toUpperCase() + troopType.slice(1);
+
+            // Create health info
+            const health = document.createElement('p');
+            health.textContent = `Vida: ${troopData.maxHealth}`;
+
+            // Create description (you can add more detailed descriptions later)
+            const description = document.createElement('p');
+            switch (troopType) {
+                case 'escroto':
+                    description.textContent = 'Un escroto que solo hace bulto.';
+                    break;
+                case 'tank':
+                    description.textContent = 'Conocido como general titagorda.';
+                    break;
+                case 'archer':
+                    description.textContent = 'Escupe pequeñas cantidades de cum a gran velocidad.';
+                    break;
+                case 'berserker':
+                    description.textContent = 'Tiene un objetivo, fecundar, y lo va a conseguir.';
+                    break;
+                case 'knight':
+                    description.textContent = 'Nose tío, average size 18cms.';
+                    break;
+                case 'mage':
+                    description.textContent = 'Vacía los testículos al completo con una gran salpicadura lechosa.';
+                    break;
+                case 'shuffler':
+                    description.textContent = 'Baile de pitos, consigue 3 poyas aleatorias.';
+                    break;
+                default:
+                    description.textContent = 'A mysterious troop with unknown abilities.';
+            }
+
+            // Assemble the card
+            imageContainer.appendChild(image);
+            infoContainer.appendChild(heading);
+            infoContainer.appendChild(health);
+            infoContainer.appendChild(description);
+
+            card.appendChild(imageContainer);
+            card.appendChild(infoContainer);
+
+            // Add card to catalog
+            cardCatalog.appendChild(card);
+        });
     }

@@ -3,10 +3,6 @@ function updateUI() {
     const player = gameState.players[playerId];
     const opponent = gameState.players[opponentId];
     if (!player || !opponent) return;
-
-    const oldManaContainer = document.getElementById('mana-container');
-    if (oldManaContainer) oldManaContainer.remove();
-
     if (previousCardData.length === 0 && player.cards) {
         previousCardData = JSON.parse(JSON.stringify(player.cards));
     }
@@ -92,15 +88,6 @@ function drawGame() {
 
         const baseSize = 100 * Math.min(scaleX, scaleY);
 
-        if (window.debugMode) {
-            const baseAttackRange = 200 * Math.min(scaleX, scaleY);
-            ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(baseX, baseY, baseAttackRange, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-
         if (player.baseAttacking) {
             const opponentId = Object.keys(gameState.players).find(id => id !== playerKey);
             const opponent = gameState.players[opponentId];
@@ -179,7 +166,11 @@ function drawGame() {
             healthBarHeight
         );
 
-        ctx.fillStyle = healthPercent > 0.7 ? '#27ae60' : healthPercent > 0.3 ? '#f39c12' : '#e74c3c';
+        const baseHealthColor = playerKey === playerId ?
+            (healthPercent > 0.7 ? '#27ae60' : healthPercent > 0.3 ? '#219653' : '#1e8449') : // Player: Green shades darkening
+            (healthPercent > 0.7 ? '#e74c3c' : healthPercent > 0.3 ? '#c0392b' : '#922b21');  // Enemy: Red shades darkening
+
+        ctx.fillStyle = baseHealthColor;
         ctx.fillRect(
             baseX - healthBarWidth/2,
             healthBarY,
@@ -319,44 +310,71 @@ function drawGame() {
                     }
                 }
 
-                // Add level display
-                if (troop.level && troop.level > 1) {
-
-                    // Add level text
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = `bold ${10 * Math.min(scaleX, scaleY)}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                }
-
                 // Health bar
                 const healthBarWidth = troopSize;
                 const healthBarHeight = 5 * Math.min(scaleX, scaleY);
-
-                // Use maxHealth if available, otherwise use current health as max
                 const maxHealth = troop.maxHealth || TROOP_CONFIG.getTroopMaxHealth(troop.type);
                 const healthPercent = troop.health / maxHealth;
 
-                ctx.fillStyle = '#7f8c8d';
-                ctx.fillRect(displayX - healthBarWidth / 2, displayY - troopSize / 2 - healthBarHeight * 2,
-                    healthBarWidth, healthBarHeight);
+                // Determine health bar color based on player ownership and health level
+                let bgColor, healthColor;
+                if (playerKey === playerId) {
+                    // Ally troop (green health bar)
+                    bgColor = '#7f8c8d'; // Background gray
+                    healthColor = healthPercent > 0.7 ? '#27ae60' : healthPercent > 0.3 ? '#219653' : '#1e8449'; // Green shades darkening
+                } else {
+                    // Enemy troop (red health bar)
+                    bgColor = '#7f8c8d'; // Background gray
+                    healthColor = healthPercent > 0.7 ? '#e74c3c' : healthPercent > 0.3 ? '#c0392b' : '#922b21'; // Red shades darkening
+                }
 
-                ctx.fillStyle = healthPercent > 0.7 ? '#27ae60' : healthPercent > 0.3 ? '#f39c12' : '#e74c3c';
-                ctx.fillRect(displayX - healthBarWidth / 2, displayY - troopSize / 2 - healthBarHeight * 2,
-                    healthBarWidth * healthPercent, healthBarHeight);
+                // Draw level indicator before health bar
+                if (troop.level && troop.level >= 1) {
+                    // Increased size for level indicator
+                    const levelWidth = 24 * Math.min(scaleX, scaleY);
+                    const levelHeight = 24 * Math.min(scaleX, scaleY);
+                    const levelColor = playerKey === playerId ? '#27ae60' : '#e74c3c'; // Green for allies, red for enemies
 
-                // Add level text next to health bar
-                if (troop.level) {
+                    // Move level indicator completely outside the health bar
+                    // Position it to the left of the health bar with a small gap
+                    ctx.fillStyle = levelColor;
+                    ctx.fillRect(
+                        displayX - healthBarWidth / 2 - levelWidth - 3 * Math.min(scaleX, scaleY),
+                        displayY - troopSize / 2 - healthBarHeight * 2 - (levelHeight - healthBarHeight) / 2,
+                        levelWidth,
+                        levelHeight
+                    );
+
+                    // Increase font size for level number
                     ctx.fillStyle = '#ffffff';
                     ctx.font = `bold ${18 * Math.min(scaleX, scaleY)}px Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(
-                        `Lvl ${troop.level}`,
-                        displayX,
-                        displayY - troopSize / 2 - healthBarHeight * 4
+                        `${troop.level}`,
+                        displayX - healthBarWidth / 2 - levelWidth/2 - 3 * Math.min(scaleX, scaleY),
+                        displayY - troopSize / 2 - healthBarHeight * 2 + healthBarHeight/2
                     );
                 }
+
+                // Draw health bar background
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(
+                    displayX - healthBarWidth / 2,
+                    displayY - troopSize / 2 - healthBarHeight * 2,
+                    healthBarWidth,
+                    healthBarHeight
+                );
+
+                // Draw health bar fill
+                ctx.fillStyle = healthColor;
+                ctx.fillRect(
+                    displayX - healthBarWidth / 2,
+                    displayY - troopSize / 2 - healthBarHeight * 2,
+                    healthBarWidth * healthPercent,
+                    healthBarHeight
+                );
+
                 if (troop.attacking && (troop.type === 'archer' || troop.type === 'mage')) {
                     const opponentId = Object.keys(gameState.players).find(id => id !== playerKey);
                     const opponent = gameState.players[opponentId];
