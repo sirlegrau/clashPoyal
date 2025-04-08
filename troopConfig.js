@@ -183,6 +183,7 @@ const cardTroopMapping = {
     'card5': troopTypes.knight,
     'card6': troopTypes.mage,
     'card7': troopTypes.shuffler,
+    'card77': troopTypes.shuffler,
     'card8': troopTypes.flacidos,
     'card9': troopTypes.lapiz,
     'card10': troopTypes.lacaja,

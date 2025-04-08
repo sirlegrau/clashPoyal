@@ -27,6 +27,7 @@ const CARD_POOL = [
     { id: 'card5', troopType: 'knight', manaCost: 3 },
     { id: 'card6', troopType: 'mage', manaCost: 7 },
     { id: 'card7', troopType: 'shuffler', manaCost: 0 },
+    { id: 'card77', troopType: 'shuffler', manaCost: 0 },
     { id: 'card8', troopType: 'flacidos', manaCost: 5 },
     { id: 'card9', troopType: 'lapiz', manaCost: 6 },
     { id: 'card10', troopType: 'lacaja', manaCost: 10 },
@@ -44,7 +45,7 @@ function drawNewCard(playedCardId) {
 function getThreeRandomCards(lastPlayedCardId = null) {
     // Create a filtered pool excluding the last played card (if one exists)
     const availableCards = lastPlayedCardId
-        ? CARD_POOL.filter(card => card.id !== lastPlayedCardId)
+        ? CARD_POOL.filter(card => card.troopType !== 'shuffler')
         : CARD_POOL;
 
     // Generate 3 random cards from the available pool

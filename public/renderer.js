@@ -83,9 +83,9 @@ function drawGame() {
         let baseY = player.basePosition.y * scaleY;
 
         if (playerPosition === 'bottom' && playerKey === playerId) {
-            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY);
+            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY) +40;
         } else if (playerPosition !== 'bottom' && playerKey !== playerId) {
-            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY);
+            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY)+40;
         }
 
         const baseSize = 100 * Math.min(scaleX, scaleY);
@@ -377,7 +377,7 @@ function drawGame() {
             });
         }
     }
-    const fontSize = 16 * Math.min(scaleX, scaleY);
+    const fontSize = 18 * Math.min(scaleX, scaleY);
     ctx.font = `bold ${fontSize}px Arial`;
     ctx.fillStyle = '#2c3e50';
     ctx.textAlign = 'center';
