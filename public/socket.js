@@ -1,7 +1,14 @@
 // Socket connection and game networking code
 
+
 // Socket connection
 let socket;
+// Add this to the beginning of your socket.js file to handle player name input
+let playerName =  '';
+
+// Variable to store player name
+
+// Create a name input screen before joining queue
 
 // Initialize socket connection and set up event handlers
 function initSocketConnection() {
@@ -26,13 +33,16 @@ function initSocketConnection() {
         opponentId = data.opponentId;
         playerPosition = data.position;
 
+        // Store player names
+        playerName = data.playerName || 'YOU';
+        opponentName = data.opponentName || 'OPPONENT';
+
         // Make sure game container is visible
         gameContainer.style.display = 'block';
 
         // Ensure canvas is properly sized when game starts
         resizeCanvas();
         initializeCardDisplay();
-
     });
     socket.on('notEnoughMana', () => {
         showNotification('💦 No tienes suficiente cum! 💦', 'error');
@@ -70,13 +80,15 @@ function initSocketConnection() {
 // Player actions
 function joinQueue() {
     if (socket && socket.connected) {
-        socket.emit('joinQueue');
+        playerName = document.querySelector('#titola-input').value;
+        console.log(document.querySelector('#titola-input').value)
+        // Send player name along with join request
+        socket.emit('joinQueue', { playerName });
         waitingMessage.style.display = 'block';
     } else {
         logDebug('Cannot join queue: socket not connected');
     }
 }
-
 function playCard(cardIndex) {
     if (socket && socket.connected && gameId) {
         socket.emit('playCard', { gameId, cardIndex });

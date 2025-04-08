@@ -1,3 +1,5 @@
+
+
 function updateUI() {
     if (!gameState || !playerId || !opponentId || !gameState.players) return;
     const player = gameState.players[playerId];
@@ -375,18 +377,37 @@ function drawGame() {
             });
         }
     }
-    const fontSize = 14 * Math.min(scaleX, scaleY);
-    ctx.font = `${fontSize}px Arial`;
+    const fontSize = 16 * Math.min(scaleX, scaleY);
+    ctx.font = `bold ${fontSize}px Arial`;
     ctx.fillStyle = '#2c3e50';
     ctx.textAlign = 'center';
 
-    if (playerPosition === 'bottom') {
-        ctx.fillText('YOU', GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 20) * scaleY);
-        ctx.fillText('OPPONENT', GAME_WIDTH/2 * scaleX, 20 * scaleY);
-    } else {
-        ctx.fillText('YOU', GAME_WIDTH/2 * scaleX, 20 * scaleY);
-        ctx.fillText('OPPONENT', GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 20) * scaleY);
+    // Draw name tags with background for better visibility
+    function drawNameTag(name, x, y, isPlayer) {
+        const padding = 10 * Math.min(scaleX, scaleY);
+        const textWidth = ctx.measureText(name).width;
+        const bgWidth = textWidth + padding * 2;
+        const bgHeight = fontSize + padding;
+
+        // Draw background
+        ctx.fillStyle = isPlayer ? 'rgba(39, 174, 96, 0.8)' : 'rgba(231, 76, 60, 0.8)';
+        ctx.beginPath();
+        ctx.roundRect(x - bgWidth/2, y - bgHeight/2, bgWidth, bgHeight, padding/2);
+        ctx.fill();
+
+        // Draw text
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(name, x, y + fontSize/4);
     }
+
+    if (playerPosition === 'bottom') {
+        drawNameTag(playerName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 30) * scaleY, true);
+        drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, 30 * scaleY, false);
+    } else {
+        drawNameTag(playerName, GAME_WIDTH/2 * scaleX, 30 * scaleY, true);
+        drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 30) * scaleY, false);
+    }
+
 }
 
 function animateCardReplacement(cardElement, newCardData) {

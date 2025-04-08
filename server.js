@@ -63,11 +63,16 @@ function getThreeRandomCards(lastPlayedCardId = null) {
 function createGame(player1Id, player2Id) {
     const gameId = `game_${Date.now()}`;
 
+    // Get player names from socket data
+    const player1Name = io.sockets.sockets.get(player1Id)?.data?.playerName || 'Player 1';
+    const player2Name = io.sockets.sockets.get(player2Id)?.data?.playerName || 'Player 2';
+
     const game = {
         id: gameId,
         players: {
             [player1Id]: {
                 id: player1Id,
+                name: player1Name, // Add player name
                 basePosition: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - BASE_SIZE / 2 },
                 baseHealth: BASE_HEALTH,
                 troops: [],
@@ -79,6 +84,7 @@ function createGame(player1Id, player2Id) {
             },
             [player2Id]: {
                 id: player2Id,
+                name: player2Name, // Add player name
                 basePosition: { x: GAME_WIDTH / 2, y: BASE_SIZE / 2 },
                 baseHealth: BASE_HEALTH,
                 troops: [],
@@ -100,20 +106,23 @@ function createGame(player1Id, player2Id) {
         gameId,
         playerId: player1Id,
         opponentId: player2Id,
-        position: 'bottom'
+        position: 'bottom',
+        playerName: player1Name,
+        opponentName: player2Name
     });
 
     io.to(player2Id).emit('gameStart', {
         gameId,
         playerId: player2Id,
         opponentId: player1Id,
-        position: 'top'
+        position: 'top',
+        playerName: player2Name,
+        opponentName: player1Name
     });
 
     startGameLoop(gameId);
     return game;
 }
-
 function startGameLoop(gameId) {
     const game = games[gameId];
     if (!game) return;
@@ -238,7 +247,9 @@ function startGameLoop(gameId) {
                     });
                     let agro = troopRange * 2;
                     if (agro < 200 && troop.type !== 'berserker') {
-                        agro = 300;
+                        agro = 250;
+                    }else if(agro > 400 ){
+                        agro = 400;
                     }
                     if (closestTroop && minDistance <= agro) {
                         targetExists = true;
@@ -318,8 +329,11 @@ function endGame(gameId, winnerId) {
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id}`);
 
-    socket.on('joinQueue', () => {
-        console.log(`Player ${socket.id} joined queue`);
+    socket.on('joinQueue', (data) => {
+        console.log(`Player ${socket.id} joined queue with name: ${data?.playerName || 'Anonymous'}`);
+
+        // Store player name in socket data
+        socket.data.playerName = data?.playerName || `Player ${socket.id.substring(0, 5)}`;
 
         if (!playerQueue.includes(socket.id)) {
             playerQueue.push(socket.id);
@@ -345,7 +359,6 @@ io.on('connection', (socket) => {
             socket.emit('waitingForOpponent');
         }
     });
-
     socket.on('playCard', ({ gameId, cardIndex }) => {
         console.log(`Player ${socket.id} played card ${cardIndex} in game ${gameId}`);
 

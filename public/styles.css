@@ -535,3 +535,37 @@ button:hover {
         padding: 15px;
     }
 }
+
+/* Titola Input Styling */
+#titola-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 15px;
+    font-size: 16px;
+    background-color: #34495e;
+    color: white;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+    margin: 10px 0;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+#titola-input:focus {
+    border-color: #9b59b6;
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.5);
+    transform: translateY(-2px);
+}
+
+#titola-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    #titola-input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}

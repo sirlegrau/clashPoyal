@@ -48,7 +48,6 @@
     const playAgainBtn = document.getElementById('play-again-btn');
     const waitingMessage = document.getElementById('waiting-message');
     const cards = document.querySelectorAll('.card');
-    
     // Debug logging
     function logDebug(message) {
         console.log(`[DEBUG] ${message}`);
@@ -259,9 +258,10 @@
         // Play button
         playBtn.addEventListener('click', () => {
             logDebug('Play button clicked');
+            playerName = document.querySelector('#titola-input').value;
             menuScreen.style.display = 'none';
             gameContainer.style.display = 'block';
-            socket.emit('joinQueue');
+            socket.emit('joinQueue', {playerName});
             waitingMessage.style.display = 'block';
         });
     
