@@ -401,11 +401,11 @@ function drawGame() {
     }
 
     if (playerPosition === 'bottom') {
-        drawNameTag(playerName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 30) * scaleY, true);
+        drawNameTag(playerName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 60) * scaleY, true);
         drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, 30 * scaleY, false);
     } else {
         drawNameTag(playerName, GAME_WIDTH/2 * scaleX, 30 * scaleY, true);
-        drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 30) * scaleY, false);
+        drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 60) * scaleY, false);
     }
 
 }

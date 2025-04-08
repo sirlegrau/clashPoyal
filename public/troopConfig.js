@@ -121,7 +121,7 @@ const TROOP_CONFIG = {
             maxHealth: 50,
             health: 50,
             attack: 1,
-            range: 350,
+            range: 325,
             speed: 0.166,
             attackSpeed: 2.66,
             size: 130,
@@ -150,7 +150,16 @@ const TROOP_CONFIG = {
             enemyColor: '#8e44ad',
             attackColor: '#8e44ad',
             description: 'Una caja misteriosa de la que salen vergas de todo tipo. ¿Qué puede salir mal?'
-        }
+        },
+        pildoras: {
+            id: 'pildoras',
+            nombre: 'Píldoras Mágicas',
+            coste:4,
+            playerColor: '#f39c12',
+            enemyColor: '#b9770e',
+            attackColor: '#d35400',
+            description: 'lo que toman los machos alpha, +10 en virilidad'
+        },
     },
 
     // Helper functions for accessing troop data

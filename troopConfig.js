@@ -152,7 +152,7 @@ const troopTypes = {
         id: 'lapiz',
         health: 50,
         attack: 1,
-        range: 350,
+        range: 325,
         speed: 0.166,
         attackSpeed: 2.66 // slower attack
     },
@@ -160,6 +160,14 @@ const troopTypes = {
         id: 'lacaja',
         health: 0,
         attack: 0,
+        range: 0,
+        speed: 0,
+        attackSpeed: 0 // slower attack
+    },
+    pildoras: {
+        id: 'pildoras',
+        health: 0,
+        attack: 10,
         range: 0,
         speed: 0,
         attackSpeed: 0 // slower attack
@@ -177,7 +185,8 @@ const cardTroopMapping = {
     'card7': troopTypes.shuffler,
     'card8': troopTypes.flacidos,
     'card9': troopTypes.lapiz,
-    'card10': troopTypes.lacaja
+    'card10': troopTypes.lacaja,
+    'card11': troopTypes.pildoras
 };
 
 // Export configurations
