@@ -69,7 +69,7 @@ const TROOP_CONFIG = {
         },
         knight: {
             id: 'knight',
-            nombre: 'poya madurita',
+            nombre: 'micropoya',
             maxHealth: 18,
             health: 18,
             attack: 3,
