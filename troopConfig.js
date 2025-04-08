@@ -67,7 +67,7 @@ const troopTypes = {
         id: 'escroto',
         health: 2,
         attack: 1,
-        range: 50,
+        range: 35,
         speed: 10,
         attackSpeed: 1.5 // attacks per second
     },
@@ -88,7 +88,7 @@ const troopTypes = {
         health: 7,
         attack: 3,
         range: 225,
-        speed: 5,
+        speed: 4,
         attackSpeed: 1
     },
 
@@ -97,7 +97,7 @@ const troopTypes = {
         id: 'berserker',
         health: 15,
         attack: 4,
-        range: 20,
+        range: 15,
         speed: 15,      // fast
         attackSpeed: 2  // attacks faster
     },
@@ -107,17 +107,17 @@ const troopTypes = {
         id: 'knight',
         health: 18,
         attack: 3,
-        range: 60,
-        speed: 7,
+        range: 35,
+        speed: 5.5,
         attackSpeed: 0.8 // slower attack
     },
 
     // Mage - very low health, high range, high damage
     mage: {
         id: 'mage',
-        health: 6,
+        health: 5,
         attack: 12,
-        range: 300,
+        range: 275,
         speed: 3.5,
         attackSpeed: 0.66 // slower attack
     },
@@ -142,11 +142,11 @@ const troopTypes = {
 
     lapiz: {
         id: 'lapiz',
-        health: 20,
+        health: 50,
         attack: 1,
         range: 350,
         speed: 0.166,
-        attackSpeed: 1.66 // slower attack
+        attackSpeed: 2.66 // slower attack
     },
     lacaja: {
         id: 'lacaja',

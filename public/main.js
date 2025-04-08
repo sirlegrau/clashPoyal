@@ -18,7 +18,9 @@
         card2: new Image(),
         card3: new Image(),
         playerBase: new Image(),
-        opponentBase: new Image()
+        opponentBase: new Image(),
+        arrow: new Image(),
+        fireball: new Image()
     };
     const troopImages = {
         escroto: new Image(),
@@ -83,6 +85,18 @@
             assets.card2.src = 'assets/card2.png';
             assets.card2.onerror = () => {
                 console.warn("Failed to load card2 image, using fallback");
+                assetLoaded();
+            };
+            assets.arrow.onload = assetLoaded;
+            assets.arrow.src = 'assets/arrow.png';
+            assets.arrow.onerror = () => {
+                console.warn("Failed to load arrow image, using fallback");
+                assetLoaded();
+            };
+            assets.fireball.onload = assetLoaded;
+            assets.fireball.src = 'assets/fireball.png';
+            assets.fireball.onerror = () => {
+                console.warn("Failed to load fireball image, using fallback");
                 assetLoaded();
             };
     
@@ -253,7 +267,7 @@
     
         // Play again button
         playAgainBtn.addEventListener('click', () => {
-            window.reload()
+            location.reload()
         });
     }
     function showNotification(message, type = 'info') {
@@ -416,54 +430,38 @@
 
             // Create heading
             const heading = document.createElement('h3');
-            heading.textContent = troopType.charAt(0).toUpperCase() + troopType.slice(1);
+            heading.textContent = troopData.nombre.charAt(0).toUpperCase() + troopData.nombre.slice(1);
 
             // Create health info
+            const desc = document.createElement('p');
+            desc.textContent = `${troopData.description}`;
             const health = document.createElement('p');
             health.textContent = `Vida: ${troopData.maxHealth}`;
+            const atk = document.createElement('p');
+            atk.textContent = `Ataque: ${troopData.attack}`;
+            const atksp = document.createElement('p');
+            atksp.textContent = `Ataques por segundo: ${troopData.attackSpeed}`;
+            const rang = document.createElement('p');
+            rang.textContent = `Rango: ${troopData.range}`;
+            const vel = document.createElement('p');
+            vel.textContent = `Velocidad: ${troopData.speed}`;
+            const cost = document.createElement('p');
+            cost.textContent = `Coste de Cum: ${troopData.coste}`;
 
-            // Create description (you can add more detailed descriptions later)
-            const description = document.createElement('p');
-            switch (troopType) {
-                case 'escroto':
-                    description.textContent = 'Un escroto que solo hace bulto.';
-                    break;
-                case 'tank':
-                    description.textContent = 'Conocido como general titagorda.';
-                    break;
-                case 'archer':
-                    description.textContent = 'Escupe pequeñas cantidades de cum a gran velocidad.';
-                    break;
-                case 'berserker':
-                    description.textContent = 'Tiene un objetivo, fecundar, y lo va a conseguir.';
-                    break;
-                case 'knight':
-                    description.textContent = 'Nose tío, average size 18cms.';
-                    break;
-                case 'mage':
-                    description.textContent = 'Vacía los testículos al completo con una gran salpicadura lechosa.';
-                    break;
-                case 'shuffler':
-                    description.textContent = 'Baile de pitos, consigue 4 poyas aleatorias.';
-                    break;
-                case 'flacidos':
-                    description.textContent = 'La unión hace la fuerza y 3 no son multidud';
-                    break;
-                case 'lapiz':
-                    description.textContent = 'jaja poya lapiz';
-                    break;
-                case 'lacaja':
-                    description.textContent = 'Una caja misteriosa de la que salen vergas de todo tipo. ¿Qué puede salir mal?';
-                    break;
-                default:
-                    description.textContent = 'A mysterious troop with unknown abilities.';
-            }
 
             // Assemble the card
             imageContainer.appendChild(image);
             infoContainer.appendChild(heading);
+            infoContainer.appendChild(desc);
+            infoContainer.appendChild(cost);
             infoContainer.appendChild(health);
-            infoContainer.appendChild(description);
+            infoContainer.appendChild(vel);
+            infoContainer.appendChild(atk);
+            infoContainer.appendChild(atksp);
+            infoContainer.appendChild(rang);
+
+
+
 
             card.appendChild(imageContainer);
             card.appendChild(infoContainer);

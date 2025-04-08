@@ -255,8 +255,6 @@ function drawGame() {
         if (player.troops && Array.isArray(player.troops)) {
             player.troops.forEach(troop => {
                 if (!troop || !troop.position) return;
-                if (!window.projectiles) window.projectiles = [];
-
                 let troopX = troop.position.x * scaleX;
                 let troopY = troop.position.y * scaleY;
                 let jiggleX = 0, jiggleY = 0;
@@ -374,82 +372,9 @@ function drawGame() {
                     healthBarWidth * healthPercent,
                     healthBarHeight
                 );
-
-                if (troop.attacking && (troop.type === 'archer' || troop.type === 'mage')) {
-                    const opponentId = Object.keys(gameState.players).find(id => id !== playerKey);
-                    const opponent = gameState.players[opponentId];
-
-                    if (opponent && opponent.troops) {
-                        const targetTroop = opponent.troops.find(t => t && t.id === troop.attacking.target);
-
-                        if (targetTroop && targetTroop.position) {
-                            const targetX = targetTroop.position.x * scaleX;
-                            const targetY = targetTroop.position.y * scaleY;
-
-                            if (Math.random() < 0.05) {
-                                let projectileType = troop.type === 'archer' ? 'arrow' : 'fireball';
-                                window.projectiles.push({
-                                    fromX: troopX,
-                                    fromY: troopY,
-                                    toX: targetX,
-                                    toY: targetY,
-                                    type: projectileType,
-                                    progress: 0,
-                                    startTime: Date.now(),
-                                    owner: playerKey
-                                });
-                            }
-                        }
-                    }
-                }
             });
         }
     }
-
-    if (window.projectiles && window.projectiles.length > 0) {
-        window.projectiles.forEach((projectile, index) => {
-            const now = Date.now();
-            const elapsed = now - projectile.startTime;
-            projectile.progress = Math.min(elapsed / 500, 1);
-
-            let currentX, currentY;
-            if (projectile.type === 'arrow') {
-                currentX = projectile.fromX + (projectile.toX - projectile.fromX) * projectile.progress;
-                const arcHeight = 30 * Math.min(scaleX, scaleY);
-                const arcFactor = 4 * projectile.progress * (1 - projectile.progress);
-                currentY = projectile.fromY + (projectile.toY - projectile.fromY) * projectile.progress - arcHeight * arcFactor;
-            } else {
-                currentX = projectile.fromX + (projectile.toX - projectile.fromX) * projectile.progress;
-                currentY = projectile.fromY + (projectile.toY - projectile.fromY) * projectile.progress;
-            }
-
-            if (!assets[projectile.type]) {
-                assets[projectile.type] = new Image();
-                assets[projectile.type].src = `assets/${projectile.type}.png`;
-            }
-
-            const projectileSize = 20 * Math.min(scaleX, scaleY);
-            if (assets[projectile.type] && assets[projectile.type].complete) {
-                ctx.drawImage(
-                    assets[projectile.type],
-                    currentX - projectileSize/2,
-                    currentY - projectileSize/2,
-                    projectileSize,
-                    projectileSize
-                );
-            } else {
-                ctx.fillStyle = projectile.type === 'arrow' ? '#2c3e50' : '#e67e22';
-                ctx.beginPath();
-                ctx.arc(currentX, currentY, projectileSize/3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            if (projectile.progress >= 1) {
-                window.projectiles.splice(index, 1);
-            }
-        });
-    }
-
     const fontSize = 14 * Math.min(scaleX, scaleY);
     ctx.font = `${fontSize}px Arial`;
     ctx.fillStyle = '#2c3e50';

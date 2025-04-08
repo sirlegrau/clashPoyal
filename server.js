@@ -123,11 +123,12 @@ function startGameLoop(gameId) {
             return;
         }
 
+        const now = Date.now();
+
         Object.keys(game.players).forEach(playerId => {
             const player = game.players[playerId];
             if (!player) return;
 
-            const now = Date.now();
             const elapsedTime = now - player.lastManaUpdateTime;
             const manaToAdd = (elapsedTime / 1000) / 2;
 
@@ -136,6 +137,26 @@ function startGameLoop(gameId) {
                 player.lastManaUpdateTime = now;
             }
 
+            // Process lapiz troops health decay
+            player.troops.forEach(troop => {
+                if (troop && troop.type === 'lapiz') {
+                    // If we don't have a last decay time, set it to now
+                    if (!troop.lastDecayTime) {
+                        troop.lastDecayTime = now;
+                    }
+
+                    // Calculate time passed since last decay
+                    const decayElapsedTime = now - troop.lastDecayTime;
+
+                    // Lose 1 HP per second
+                    if (decayElapsedTime >= 1000) {
+                        // Calculate how many seconds have passed and reduce that much HP
+                        const secondsPassed = Math.floor(decayElapsedTime / 1000);
+                        troop.health -= secondsPassed;
+                        troop.lastDecayTime = now - (decayElapsedTime % 1000); // Save remainder
+                    }
+                }
+            });
             player.troops = player.troops.filter(troop => troop && troop.health > 0);
 
             const opponentId = Object.keys(game.players).find(id => id !== playerId);
@@ -214,8 +235,11 @@ function startGameLoop(gameId) {
                             closestTroop = enemyTroop;
                         }
                     });
-
-                    if (closestTroop && minDistance <= troopRange * 2.66) {
+                    let agro = troopRange * 2;
+                    if (agro < 200 && troop.type !== 'berserker') {
+                        agro = 300;
+                    }
+                    if (closestTroop && minDistance <= agro) {
                         targetExists = true;
                         targetPosition = closestTroop.position;
                         troop.currentTarget = closestTroop.id;
