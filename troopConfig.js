@@ -1,4 +1,4 @@
-// troopConfig.js - modified version
+// troopConfig.js
 const playerTroopLevels = {};
 
 // Initialize player troop levels
@@ -69,8 +69,7 @@ const troopTypes = {
         attack: 1,
         range: 50,
         speed: 10,
-        attackSpeed: 1.5, // attacks per second
-        manaCost: 1
+        attackSpeed: 1.5 // attacks per second
     },
 
     // Tank - high health, low speed, medium damage
@@ -80,8 +79,7 @@ const troopTypes = {
         attack: 2,
         range: 40,
         speed: 3,
-        attackSpeed: 1, // slower attack
-        manaCost: 8
+        attackSpeed: 1 // slower attack
     },
 
     // Archer - low health, high range, medium damage
@@ -91,8 +89,7 @@ const troopTypes = {
         attack: 3,
         range: 225,
         speed: 5,
-        attackSpeed: 1,
-        manaCost: 5
+        attackSpeed: 1
     },
 
     // Berserker - medium health, high attack, low range
@@ -102,8 +99,7 @@ const troopTypes = {
         attack: 4,
         range: 20,
         speed: 15,      // fast
-        attackSpeed: 2,  // attacks faster
-        manaCost: 4
+        attackSpeed: 2  // attacks faster
     },
 
     // Knight - high health, high attack, medium range
@@ -113,8 +109,7 @@ const troopTypes = {
         attack: 3,
         range: 60,
         speed: 7,
-        attackSpeed: 0.8, // slower attack
-        manaCost: 3
+        attackSpeed: 0.8 // slower attack
     },
 
     // Mage - very low health, high range, high damage
@@ -124,8 +119,7 @@ const troopTypes = {
         attack: 12,
         range: 300,
         speed: 3.5,
-        attackSpeed: 0.66, // slower attack
-        manaCost: 7
+        attackSpeed: 0.66 // slower attack
     },
 
     shuffler: {
@@ -134,8 +128,7 @@ const troopTypes = {
         attack: 0,
         range: 0,
         speed: 0,
-        attackSpeed: 0, // slower attack
-        manaCost: 0
+        attackSpeed: 0 // slower attack
     },
 
     flacidos: {
@@ -144,8 +137,7 @@ const troopTypes = {
         attack: 2,
         range: 50,
         speed: 7,
-        attackSpeed: 1.5, // slower attack
-        manaCost: 5
+        attackSpeed: 1.5 // slower attack
     },
 
     lapiz: {
@@ -154,8 +146,7 @@ const troopTypes = {
         attack: 1,
         range: 350,
         speed: 0.166,
-        attackSpeed: 1.66, // slower attack
-        manaCost: 6
+        attackSpeed: 1.66 // slower attack
     },
     lacaja: {
         id: 'lacaja',
@@ -163,34 +154,45 @@ const troopTypes = {
         attack: 0,
         range: 0,
         speed: 0,
-        attackSpeed: 0, // slower attack
-        manaCost: 10
-    },
+        attackSpeed: 0 // slower attack
+    }
 };
 
-// Create card pool directly from troop types
-const CARD_POOL = Object.values(troopTypes).map(troop => ({
-    id: troop.id,
-    troopType: troop.id,
-    manaCost: troop.manaCost
-}));
+// Map card IDs to troop types
+const cardTroopMapping = {
+    'card1': troopTypes.escroto,
+    'card2': troopTypes.archer,
+    'card3': troopTypes.tank,
+    'card4': troopTypes.berserker,
+    'card5': troopTypes.knight,
+    'card6': troopTypes.mage,
+    'card7': troopTypes.shuffler,
+    'card8': troopTypes.flacidos,
+    'card9': troopTypes.lapiz,
+    'card10': troopTypes.lacaja
+};
 
 // Export configurations
 module.exports = {
     troopTypes,
-    CARD_POOL,
+    cardTroopMapping,
     initializePlayerTroopLevels,
     levelUpTroop,
     getTroopLevel,
     getScaledTroopStat,
+
+    // Method to get troop config by card ID
+    getTroopConfigByCardId: function(cardId) {
+        return cardTroopMapping[cardId] || troopTypes.escroto; // Default to soldier
+    },
 
     // Method to get troop config by type ID
     getTroopConfigByTypeId: function(typeId) {
         return troopTypes[typeId] || troopTypes.escroto; // Default to soldier
     },
 
-    // Get mana cost for a troop type
+    // Get mana cost for a troop type - keeping function signature but updating implementation
     getManaCost: function(typeId) {
-        return troopTypes[typeId]?.manaCost || 1; // Default to 1
+        return 1; // Default to 1 since manaCost was removed
     }
 };

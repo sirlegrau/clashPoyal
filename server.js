@@ -19,27 +19,36 @@ const BASE_ATTACK_SPEED = 1.2;
 
 const games = {};
 const playerQueue = [];
-// Use card pool directly from troopConfig
-const CARD_POOL = troopConfig.CARD_POOL;
+const CARD_POOL = [
+    { id: 'card1', troopType: 'escroto', manaCost: 1 },
+    { id: 'card2', troopType: 'archer', manaCost: 5 },
+    { id: 'card3', troopType: 'tank', manaCost: 8 },
+    { id: 'card4', troopType: 'berserker', manaCost: 4 },
+    { id: 'card5', troopType: 'knight', manaCost: 3 },
+    { id: 'card6', troopType: 'mage', manaCost: 7 },
+    { id: 'card7', troopType: 'shuffler', manaCost: 0 },
+    { id: 'card8', troopType: 'flacidos', manaCost: 5 },
+    { id: 'card9', troopType: 'lapiz', manaCost: 6 },
+    { id: 'card10', troopType: 'lacaja', manaCost: 10 }
+
+
+];
 
 function getInitialCards() {
-    // Return 4 copies of the first card (typically escroto)
-    const initialCard = CARD_POOL.find(card => card.id === 'escroto') || CARD_POOL[0];
-    return Array(4).fill(initialCard);
+    return Array(4).fill({ id: 'card1', troopType: 'escroto', manaCost: 1 });
 }
 
 function drawNewCard(playedCardId) {
     const availableCards = CARD_POOL.filter(card => card.id !== playedCardId);
     return availableCards[Math.floor(Math.random() * availableCards.length)];
 }
-
 function getThreeRandomCards(lastPlayedCardId = null) {
     // Create a filtered pool excluding the last played card (if one exists)
     const availableCards = lastPlayedCardId
         ? CARD_POOL.filter(card => card.id !== lastPlayedCardId)
         : CARD_POOL;
 
-    // Generate 4 random cards from the available pool
+    // Generate 3 random cards from the available pool
     const randomCards = [];
 
     for (let i = 0; i < 4; i++) {
@@ -344,14 +353,8 @@ io.on('connection', (socket) => {
         const newLevel = troopConfig.levelUpTroop(socket.id, troopType);
         console.log(`Player ${socket.id} leveled up ${troopType} to level ${newLevel}`);
 
-        const baseTroopStats = troopConfig.getTroopConfigByTypeId(troopType);
-        const health = troopConfig.getScaledTroopStat(baseTroopStats.health, newLevel);
-        const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, newLevel);
-        const range = baseTroopStats.range;
-        const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, newLevel);
-        const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, newLevel);
-
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
+
         if (troopType === 'flacidos') {
             // Create 3 troops instead of 1
             for (let i = 0; i < 3; i++) {
@@ -363,6 +366,13 @@ io.on('connection', (socket) => {
                     x: player.basePosition.x + offsetX + (Math.random() * 40 - 20), // Add a little randomness
                     y: player.basePosition.y + (isFirstPlayer ? -50 : 50) + (Math.random() * 30 - 15)
                 };
+
+                const baseTroopStats = troopConfig.getTroopConfigByTypeId(troopType);
+                const health = troopConfig.getScaledTroopStat(baseTroopStats.health, newLevel);
+                const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, newLevel);
+                const range = baseTroopStats.range;
+                const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, newLevel);
+                const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, newLevel);
 
                 const newTroop = {
                     id: troopId,
@@ -384,46 +394,40 @@ io.on('connection', (socket) => {
                 player.troops.push(newTroop);
                 console.log(`Spawned flacidos troop ${i+1}/3:`, newTroop);
             }
-        }else if (troopType === 'lacaja') {
+        } else if (troopType === 'lacaja') {
             // Create 3 random troops
-            console.log('Spawning random troops from lacaja');
-
-            // Get all available troop types excluding flacidos and shuffler
             const availableTroopTypes = CARD_POOL
-                .filter(card => card.id !== 'lacaja' && card.id !== 'shuffler')
+                .filter(card => card.troopType !== 'lacaja' && card.troopType !== 'shuffler')
                 .map(card => card.troopType);
 
-            // Spawn 3 random troops
             for (let i = 0; i < 3; i++) {
-                // Select a random troop type
-                const randomTroopType = availableTroopTypes[Math.floor(Math.random() * availableTroopTypes.length)];
-
-                // Get the current level for this troop type
-                const currentLevel = troopConfig.levelUpTroop(socket.id, randomTroopType);
-                console.log(`Player ${socket.id} using ${randomTroopType} at level ${currentLevel}`);
-
-                const baseTroopStats = troopConfig.getTroopConfigByTypeId(randomTroopType);
-
-                // Scale stats based on current level
-                const health = troopConfig.getScaledTroopStat(baseTroopStats.health, currentLevel);
-                const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, currentLevel);
-                const range = baseTroopStats.range;
-                const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, currentLevel);
-                const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, currentLevel);
-
                 const troopId = `troop_${socket.id}_${Date.now()}_${i}`;
 
-                // Create different spawn positions like flacidos
+                // Select a random troop type from filtered list
+                const randomTroopType = availableTroopTypes[Math.floor(Math.random() * availableTroopTypes.length)];
+
+                // Level up the random troop
+                const randomTroopLevel = troopConfig.levelUpTroop(socket.id, randomTroopType);
+
+                // Get stats for the random troop type
+                const baseTroopStats = troopConfig.getTroopConfigByTypeId(randomTroopType);
+                const health = troopConfig.getScaledTroopStat(baseTroopStats.health, randomTroopLevel);
+                const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, randomTroopLevel);
+                const range = baseTroopStats.range;
+                const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, randomTroopLevel);
+                const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, randomTroopLevel);
+
+                // Create different spawn positions for each troop
                 const offsetX = (i - 1) * 80; // -80, 0, 80 spacing
                 const spawnPos = {
-                    x: player.basePosition.x + offsetX + (Math.random() * 40 - 20), // Add randomness
+                    x: player.basePosition.x + offsetX + (Math.random() * 40 - 20), // Add a little randomness
                     y: player.basePosition.y + (isFirstPlayer ? -50 : 50) + (Math.random() * 30 - 15)
                 };
 
                 const newTroop = {
                     id: troopId,
                     type: randomTroopType,
-                    level: currentLevel,
+                    level: randomTroopLevel,
                     position: spawnPos,
                     health: health,
                     maxHealth: health,
@@ -438,16 +442,22 @@ io.on('connection', (socket) => {
                 };
 
                 player.troops.push(newTroop);
-                console.log(`Spawned random troop ${i+1}/3 of type ${randomTroopType} at level ${currentLevel}:`, newTroop);
+                console.log(`Spawned random troop from lacaja ${i+1}/3:`, newTroop);
             }
-        }
-        else {
+        } else {
             // Original code for other troop types (spawns 1 troop)
             const troopId = `troop_${socket.id}_${Date.now()}`;
             const spawnPos = {
                 x: player.basePosition.x + (Math.random() * 300 - 40),
                 y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
             };
+
+            const baseTroopStats = troopConfig.getTroopConfigByTypeId(troopType);
+            const health = troopConfig.getScaledTroopStat(baseTroopStats.health, newLevel);
+            const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, newLevel);
+            const range = baseTroopStats.range;
+            const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, newLevel);
+            const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, newLevel);
 
             const newTroop = {
                 id: troopId,
@@ -471,7 +481,7 @@ io.on('connection', (socket) => {
         }
 
         const playedCardId = card.id;
-        if (playedCardId !== 'shuffler'){
+        if (troopType !== 'shuffler'){
             player.cards[cardIndex] = drawNewCard(playedCardId);
         } else {
             player.cards = getThreeRandomCards(playedCardId);
