@@ -45,17 +45,25 @@ function getScaledTroopStat(baseStat, level) {
     if (level <= 1) {
         return Math.floor(baseStat * 100) / 100;
     }
-
     let scaledStat = baseStat;
-
+    // Initialize Fibonacci sequence
+    let fibPrev = 1;
+    let fibCurrent = 1;
     // Apply scaling for each level above 1
     for (let i = 2; i <= level; i++) {
-        // Calculate percentage for this level (10% + (i-2)*1%)
-        let percentage = 10 + (i - 2);
-        let increase = baseStat * (percentage / 100);
-        scaledStat += increase;
+        // Add 10% of base stat
+        let baseIncrease = baseStat * 0.1;
+        // Add Fibonacci percentage of base stat
+        let fibIncrease = baseStat * (fibPrev / 100);
+        // Add both increases to the scaled stat
+        scaledStat += baseIncrease + fibIncrease;
+        // Calculate next Fibonacci number if needed for next level
+        if (i < level) {
+            let temp = fibCurrent;
+            fibCurrent = fibCurrent + fibPrev;
+            fibPrev = temp;
+        }
     }
-
     // Round down to 2 decimal places
     return Math.floor(scaledStat * 100) / 100;
 }
