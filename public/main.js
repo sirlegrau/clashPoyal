@@ -253,11 +253,7 @@
     
         // Play again button
         playAgainBtn.addEventListener('click', () => {
-            logDebug('Play again button clicked');
-            gameOverScreen.style.display = 'none';
-            gameContainer.style.display = 'block';
-            socket.emit('joinQueue');
-            waitingMessage.style.display = 'block';
+            window.reload()
         });
     }
     function showNotification(message, type = 'info') {
