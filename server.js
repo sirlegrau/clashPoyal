@@ -30,6 +30,7 @@ const CARD_POOL = [
     { id: 'card8', troopType: 'flacidos', manaCost: 5 },
     { id: 'card9', troopType: 'lapiz', manaCost: 6 },
     { id: 'card10', troopType: 'lacaja', manaCost: 10 }
+   // { id: 'card11', troopType: 'pildoras', manaCost: 10 }
 
 
 ];
