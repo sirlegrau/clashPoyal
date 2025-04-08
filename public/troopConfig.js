@@ -65,6 +65,13 @@ const TROOP_CONFIG = {
             playerColor: '#9b59b6',
             enemyColor: '#8e44ad',
             attackColor: '#8e44ad'
+        },
+        lacaja: {
+            maxHealth: 0,
+            size: 130,
+            playerColor: '#9b59b6',
+            enemyColor: '#8e44ad',
+            attackColor: '#8e44ad'
         }
 
     },

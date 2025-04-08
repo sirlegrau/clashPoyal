@@ -1,4 +1,4 @@
-// troopConfig.js
+// troopConfig.js - modified version
 const playerTroopLevels = {};
 
 // Initialize player troop levels
@@ -11,8 +11,8 @@ function initializePlayerTroopLevels(playerId) {
             berserker: 0,
             knight: 0,
             mage: 0,
-            flacidos:0,
-            lapiz:0
+            flacidos: 0,
+            lapiz: 0
         };
     }
     return playerTroopLevels[playerId];
@@ -59,6 +59,7 @@ function getScaledTroopStat(baseStat, level) {
     // Round down to 2 decimal places
     return Math.floor(scaledStat * 100) / 100;
 }
+
 // Configuration for all troop types
 const troopTypes = {
     // Regular soldier - balanced stats
@@ -69,10 +70,7 @@ const troopTypes = {
         range: 50,
         speed: 10,
         attackSpeed: 1.5, // attacks per second
-        cost: 1,        // energy cost
-        manaCost: 1,    // mana cost to play this troop
-        imageUrl: 'assets/escroto.png',
-        description: 'Balanced infantry unit'
+        manaCost: 1
     },
 
     // Tank - high health, low speed, medium damage
@@ -83,10 +81,7 @@ const troopTypes = {
         range: 40,
         speed: 3,
         attackSpeed: 1, // slower attack
-        cost: 3,
-        manaCost: 8,    // mana cost to play this troop
-        imageUrl: 'assets/tank.png',
-        description: 'Heavy unit with high health'
+        manaCost: 8
     },
 
     // Archer - low health, high range, medium damage
@@ -97,10 +92,7 @@ const troopTypes = {
         range: 225,
         speed: 5,
         attackSpeed: 1,
-        cost: 2,
-        manaCost: 5,    // mana cost to play this troop
-        imageUrl: 'assets/archer.png',
-        description: 'Ranged unit with high attack range'
+        manaCost: 5
     },
 
     // Berserker - medium health, high attack, low range
@@ -110,11 +102,8 @@ const troopTypes = {
         attack: 4,
         range: 20,
         speed: 15,      // fast
-        attackSpeed: 2, // attacks faster
-        cost: 2,
-        manaCost: 4,    // mana cost to play this troop
-        imageUrl: 'assets/berserker.png',
-        description: 'Fast melee unit with high damage'
+        attackSpeed: 2,  // attacks faster
+        manaCost: 4
     },
 
     // Knight - high health, high attack, medium range
@@ -125,10 +114,7 @@ const troopTypes = {
         range: 60,
         speed: 7,
         attackSpeed: 0.8, // slower attack
-        cost: 3,
-        manaCost: 3,    // mana cost to play this troop
-        imageUrl: 'assets/knight.png',
-        description: 'Strong melee unit with good health and damage'
+        manaCost: 3
     },
 
     // Mage - very low health, high range, high damage
@@ -139,11 +125,9 @@ const troopTypes = {
         range: 300,
         speed: 3.5,
         attackSpeed: 0.66, // slower attack
-        cost: 3,
-        manaCost: 7,    // mana cost to play this troop
-        imageUrl: 'assets/mage.png',
-        description: 'Powerful ranged unit with high damage but low health'
+        manaCost: 7
     },
+
     shuffler: {
         id: 'shuffler',
         health: 0,
@@ -151,11 +135,9 @@ const troopTypes = {
         range: 0,
         speed: 0,
         attackSpeed: 0, // slower attack
-        cost: 0,
-        manaCost: 0,    // mana cost to play this troop
-        imageUrl: 'assets/shuffler.png',
-        description: 'Powerful ranged unit with high damage but low health'
+        manaCost: 0
     },
+
     flacidos: {
         id: 'flacidos',
         health: 4,
@@ -163,11 +145,9 @@ const troopTypes = {
         range: 50,
         speed: 7,
         attackSpeed: 1.5, // slower attack
-        cost: 5,
-        manaCost: 5,    // mana cost to play this troop
-        imageUrl: 'assets/flacidos.png',
-        description: 'Powerful ranged unit with high damage but low health'
+        manaCost: 5
     },
+
     lapiz: {
         id: 'lapiz',
         health: 20,
@@ -175,39 +155,34 @@ const troopTypes = {
         range: 350,
         speed: 0.166,
         attackSpeed: 1.66, // slower attack
-        cost: 6,
-        manaCost: 6,    // mana cost to play this troop
-        imageUrl: 'assets/lapiz.png',
-        description: 'Powerful ranged unit with high damage but low health'
-    }
-
+        manaCost: 6
+    },
+    lacaja: {
+        id: 'lacaja',
+        health: 0,
+        attack: 0,
+        range: 0,
+        speed: 0,
+        attackSpeed: 0, // slower attack
+        manaCost: 10
+    },
 };
 
-// Map card IDs to troop types
-const cardTroopMapping = {
-    'card1': troopTypes.escroto,
-    'card2': troopTypes.archer,
-    'card3': troopTypes.tank,
-    'card4': troopTypes.berserker,
-    'card5': troopTypes.knight,
-    'card6': troopTypes.mage,
-    'card7': troopTypes.shuffler,
-    'card8': troopTypes.flacidos
-};
+// Create card pool directly from troop types
+const CARD_POOL = Object.values(troopTypes).map(troop => ({
+    id: troop.id,
+    troopType: troop.id,
+    manaCost: troop.manaCost
+}));
 
 // Export configurations
 module.exports = {
     troopTypes,
-    cardTroopMapping,
+    CARD_POOL,
     initializePlayerTroopLevels,
     levelUpTroop,
     getTroopLevel,
     getScaledTroopStat,
-
-    // Method to get troop config by card ID
-    getTroopConfigByCardId: function(cardId) {
-        return cardTroopMapping[cardId] || troopTypes.escroto; // Default to soldier
-    },
 
     // Method to get troop config by type ID
     getTroopConfigByTypeId: function(typeId) {
@@ -218,5 +193,4 @@ module.exports = {
     getManaCost: function(typeId) {
         return troopTypes[typeId]?.manaCost || 1; // Default to 1
     }
-
 };

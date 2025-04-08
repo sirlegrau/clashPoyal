@@ -456,6 +456,9 @@
                 case 'lapiz':
                     description.textContent = 'jaja poya lapiz';
                     break;
+                case 'lacaja':
+                    description.textContent = 'Una caja misteriosa de la que salen vergas de todo tipo. ¿Qué puede salir mal?';
+                    break;
                 default:
                     description.textContent = 'A mysterious troop with unknown abilities.';
             }
