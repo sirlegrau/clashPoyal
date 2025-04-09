@@ -19,7 +19,8 @@ const BASE_ATTACK_SPEED = 1.2;
 
 const games = {};
 const playerQueue = [];
-const CARD_POOL = [
+// Base card pool as a starting point
+const BASE_CARD_POOL = [
     { id: 'card1', troopType: 'escroto', manaCost: 1 },
     { id: 'card2', troopType: 'archer', manaCost: 5 },
     { id: 'card3', troopType: 'tank', manaCost: 8 },
@@ -27,28 +28,70 @@ const CARD_POOL = [
     { id: 'card5', troopType: 'knight', manaCost: 3 },
     { id: 'card6', troopType: 'mage', manaCost: 7 },
     { id: 'card7', troopType: 'shuffler', manaCost: 0 },
-    { id: 'card77', troopType: 'shuffler', manaCost: 0 },
     { id: 'card8', troopType: 'flacidos', manaCost: 5 },
     { id: 'card9', troopType: 'lapiz', manaCost: 6 },
     { id: 'card10', troopType: 'lacaja', manaCost: 10 },
     { id: 'card11', troopType: 'pildoras', manaCost: 4 }
 ];
 
+// Player-specific card pools
+const playerCardPools = {};
+
 function getInitialCards() {
-    return Array(4).fill({ id: 'card1', troopType: 'escroto', manaCost: 1 });
+    return Array(4).fill({ id: 'card7', troopType: 'shuffler', manaCost: 1 });
 }
 
-function drawNewCard(playedCardId) {
-    const availableCards = CARD_POOL.filter(card => card.id !== playedCardId);
-    return availableCards[Math.floor(Math.random() * availableCards.length)];
+function initializePlayerCardPool(playerId) {
+    // Create a deep copy of the base card pool for this player
+    playerCardPools[playerId] = JSON.parse(JSON.stringify(BASE_CARD_POOL));
 }
-function getThreeRandomCards(lastPlayedCardId = null) {
-    // Create a filtered pool excluding the last played card (if one exists)
-    const availableCards = lastPlayedCardId
-        ? CARD_POOL.filter(card => card.troopType !== 'shuffler')
-        : CARD_POOL;
 
-    // Generate 3 random cards from the available pool
+function drawNewCard(playerId, playedCardId) {
+    // Get the player's personalized card pool
+    const playerPool = playerCardPools[playerId];
+    if (!playerPool) {
+        initializePlayerCardPool(playerId);
+    }
+
+    // Add an extra copy of the played card type to increase its probability
+    const playedCard = playerPool.find(card => card.id === playedCardId);
+    if (playedCard) {
+        // Create a new unique ID for the duplicated card
+        const duplicateCard = {
+            id: playedCardId,
+            troopType: playedCard.troopType,
+            manaCost: playedCard.manaCost
+        };
+
+        playerCardPools[playerId].push(duplicateCard);
+        console.log(`Added duplicate of ${playedCard.troopType} to player ${playerId}'s pool`);
+    }
+
+    // Now draw a random card from the player's expanded pool
+    const randomIndex = Math.floor(Math.random() * playerCardPools[playerId].length);
+    return playerCardPools[playerId][randomIndex];
+}
+
+function getThreeRandomCards(playerId, lastPlayedCardId = null) {
+    // Get the player's personalized card pool
+
+    const playerPool = playerCardPools[playerId];
+    if (!playerPool) {
+        initializePlayerCardPool(playerId);
+    }
+        // Create a new unique ID for the duplicated card
+        const duplicateCard = {
+            id: 'card7',
+            troopType: 'shuffler',
+            manaCost: '0'
+        };
+
+        playerCardPools[playerId].push(duplicateCard);
+        console.log(`Added duplicate of sufflerrrr to player ${playerId}'s pool`);
+       // Create a filtered pool excluding shufflers
+    const availableCards = playerPool.filter(card => card.troopType !== 'shuffler');
+
+    // Generate 4 random cards from the available pool
     const randomCards = [];
 
     for (let i = 0; i < 4; i++) {
@@ -66,12 +109,16 @@ function createGame(player1Id, player2Id) {
     const player1Name = io.sockets.sockets.get(player1Id)?.data?.playerName || 'Player 1';
     const player2Name = io.sockets.sockets.get(player2Id)?.data?.playerName || 'Player 2';
 
+    // Initialize card pools for both players
+    initializePlayerCardPool(player1Id);
+    initializePlayerCardPool(player2Id);
+
     const game = {
         id: gameId,
         players: {
             [player1Id]: {
                 id: player1Id,
-                name: player1Name, // Add player name
+                name: player1Name,
                 basePosition: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - BASE_SIZE / 2 },
                 baseHealth: BASE_HEALTH,
                 troops: [],
@@ -83,7 +130,7 @@ function createGame(player1Id, player2Id) {
             },
             [player2Id]: {
                 id: player2Id,
-                name: player2Name, // Add player name
+                name: player2Name,
                 basePosition: { x: GAME_WIDTH / 2, y: BASE_SIZE / 2 },
                 baseHealth: BASE_HEALTH,
                 troops: [],
@@ -122,6 +169,7 @@ function createGame(player1Id, player2Id) {
     startGameLoop(gameId);
     return game;
 }
+
 function startGameLoop(gameId) {
     const game = games[gameId];
     if (!game) return;
@@ -161,7 +209,7 @@ function startGameLoop(gameId) {
                     if (decayElapsedTime >= 1000) {
                         // Calculate how many seconds have passed and reduce that much HP
                         const secondsPassed = Math.floor(decayElapsedTime / 1000);
-                        troop.health -= secondsPassed;
+                        troop.health -= secondsPassed /2;
                         troop.lastDecayTime = now - (decayElapsedTime % 1000); // Save remainder
                     }
                 }
@@ -320,6 +368,14 @@ function endGame(gameId, winnerId) {
     io.to(winnerId).emit('gameOver', { result: 'win' });
     io.to(loserId).emit('gameOver', { result: 'lose' });
 
+    // Clean up player card pools when game ends
+    if (playerCardPools[winnerId]) {
+        delete playerCardPools[winnerId];
+    }
+    if (playerCardPools[loserId]) {
+        delete playerCardPools[loserId];
+    }
+
     setTimeout(() => {
         delete games[gameId];
     }, 5000);
@@ -475,7 +531,7 @@ io.on('connection', (socket) => {
             }
         } else if (troopType === 'lacaja') {
             // Create 3 random troops
-            const availableTroopTypes = CARD_POOL
+            const availableTroopTypes = BASE_CARD_POOL
                 .filter(card => card.troopType !== 'lacaja' && card.troopType !== 'shuffler' && card.troopType !== 'pildoras')
                 .map(card => card.troopType);
 
@@ -561,9 +617,9 @@ io.on('connection', (socket) => {
 
         const playedCardId = card.id;
         if (troopType !== 'shuffler'){
-            player.cards[cardIndex] = drawNewCard(playedCardId);
+            player.cards[cardIndex] = drawNewCard(socket.id, playedCardId);
         } else {
-            player.cards = getThreeRandomCards(playedCardId);
+            player.cards = getThreeRandomCards(socket.id, playedCardId);
         }
 
         io.to(gameId).emit('gameState', game);
@@ -575,6 +631,11 @@ io.on('connection', (socket) => {
         const queueIndex = playerQueue.indexOf(socket.id);
         if (queueIndex !== -1) {
             playerQueue.splice(queueIndex, 1);
+        }
+
+        // Clean up the player's card pool
+        if (playerCardPools[socket.id]) {
+            delete playerCardPools[socket.id];
         }
 
         for (const gameId in games) {

@@ -150,11 +150,11 @@ const troopTypes = {
 
     lapiz: {
         id: 'lapiz',
-        health: 50,
+        health: 25,
         attack: 1,
-        range: 325,
+        range: 300,
         speed: 0.166,
-        attackSpeed: 2.66 // slower attack
+        attackSpeed: 2.33 // slower attack
     },
     lacaja: {
         id: 'lacaja',
@@ -183,7 +183,6 @@ const cardTroopMapping = {
     'card5': troopTypes.knight,
     'card6': troopTypes.mage,
     'card7': troopTypes.shuffler,
-    'card77': troopTypes.shuffler,
     'card8': troopTypes.flacidos,
     'card9': troopTypes.lapiz,
     'card10': troopTypes.lacaja,

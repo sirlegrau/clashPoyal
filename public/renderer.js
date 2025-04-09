@@ -1,5 +1,3 @@
-
-
 function updateUI() {
     if (!gameState || !playerId || !opponentId || !gameState.players) return;
     const player = gameState.players[playerId];
@@ -83,9 +81,9 @@ function drawGame() {
         let baseY = player.basePosition.y * scaleY;
 
         if (playerPosition === 'bottom' && playerKey === playerId) {
-            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY) +40;
+            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY) +20;
         } else if (playerPosition !== 'bottom' && playerKey !== playerId) {
-            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY)+40;
+            baseY = baseY - (GAME_HEIGHT * 0.1 * scaleY)+20;
         }
 
         const baseSize = 100 * Math.min(scaleX, scaleY);
@@ -401,11 +399,11 @@ function drawGame() {
     }
 
     if (playerPosition === 'bottom') {
-        drawNameTag(playerName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 60) * scaleY, true);
+        drawNameTag(playerName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 80) * scaleY, true);
         drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, 30 * scaleY, false);
     } else {
         drawNameTag(playerName, GAME_WIDTH/2 * scaleX, 30 * scaleY, true);
-        drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 60) * scaleY, false);
+        drawNameTag(opponentName, GAME_WIDTH/2 * scaleX, (GAME_HEIGHT - 80) * scaleY, false);
     }
 
 }
