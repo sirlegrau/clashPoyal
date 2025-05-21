@@ -66,7 +66,7 @@ function drawNewCard(playerId, playedCardId) {
         };
 
         playerCardPools[playerId].push(duplicateCard);
-        console.log(`Added duplicate of ${playedCard.troopType} to player ${playerId}'s pool`);
+      //  console.log(`Added duplicate of ${playedCard.troopType} to player ${playerId}'s pool`);
     }
 
     // Now draw a random card from the player's expanded pool
@@ -89,7 +89,7 @@ function getThreeRandomCards(playerId, lastPlayedCardId = null) {
         };
 
         playerCardPools[playerId].push(duplicateCard);
-        console.log(`Added duplicate of sufflerrrr to player ${playerId}'s pool`);
+       // console.log(`Added duplicate of sufflerrrr to player ${playerId}'s pool`);
        // Create a filtered pool excluding shufflers
     const availableCards = playerPool.filter(card => card.troopType !== 'shuffler');
 
@@ -384,10 +384,10 @@ function endGame(gameId, winnerId) {
 }
 
 io.on('connection', (socket) => {
-    console.log(`Player connected: ${socket.id}`);
+    //console.log(`Player connected: ${socket.id}`);
 
     socket.on('joinQueue', (data) => {
-        console.log(`Player ${socket.id} joined queue with name: ${data?.playerName || 'Anonymous'}`);
+     //   console.log(`Player ${socket.id} joined queue with name: ${data?.playerName || 'Anonymous'}`);
 
         // Store player name in socket data
         socket.data.playerName = data?.playerName || `Player ${socket.id.substring(0, 5)}`;
@@ -417,28 +417,28 @@ io.on('connection', (socket) => {
         }
     });
     socket.on('playCard', ({ gameId, cardIndex }) => {
-        console.log(`Player ${socket.id} played card ${cardIndex} in game ${gameId}`);
+     //   console.log(`Player ${socket.id} played card ${cardIndex} in game ${gameId}`);
 
         const game = games[gameId];
         if (!game || !game.active) {
-            console.log("Game not found or not active");
+         //   console.log("Game not found or not active");
             return;
         }
 
         const player = game.players[socket.id];
         if (!player) {
-            console.log("Player not found in game");
+           // console.log("Player not found in game");
             return;
         }
 
         const card = player.cards[cardIndex];
         if (!card) {
-            console.log("Card not found");
+         //   console.log("Card not found");
             return;
         }
 
         if (player.mana < card.manaCost) {
-            console.log("💦 No tienes suficiente cum!");
+           // console.log("💦 No tienes suficiente cum!");
             socket.emit('notEnoughMana');
             return;
         }
@@ -446,7 +446,7 @@ io.on('connection', (socket) => {
         player.mana -= card.manaCost;
         const troopType = card.troopType; // This is now directly the troop ID
         const newLevel = troopConfig.levelUpTroop(socket.id, troopType);
-        console.log(`Player ${socket.id} leveled up ${troopType} to level ${newLevel}`);
+       // console.log(`Player ${socket.id} leveled up ${troopType} to level ${newLevel}`);
 
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
 
@@ -455,7 +455,7 @@ io.on('connection', (socket) => {
             // Add 3 mana to the player, but don't exceed maxMana
             player.mana = Math.min(player.maxMana, player.mana + 3);
 
-            console.log(`Player ${socket.id} received 3 mana from bolsa. New mana: ${player.mana}`);
+           // console.log(`Player ${socket.id} received 3 mana from bolsa. New mana: ${player.mana}`);
 
             // Create the troop like normal
             const troopId = `troop_${socket.id}_${Date.now()}`;
@@ -489,7 +489,7 @@ io.on('connection', (socket) => {
             };
 
             player.troops.push(newTroop);
-            console.log(`Spawned bolsa troop:`, newTroop);
+            //console.log(`Spawned bolsa troop:`, newTroop);
         }
         // Special handling for pildoras - heal the base
         else if (troopType === 'pildoras') {
@@ -500,7 +500,7 @@ io.on('connection', (socket) => {
             // Heal the base by the amount of the pildoras' attack
             player.baseHealth = Math.min(BASE_HEALTH, player.baseHealth + attack);
 
-            console.log(`Base healed for ${attack} points. New base health: ${player.baseHealth}`);
+          //  console.log(`Base healed for ${attack} points. New base health: ${player.baseHealth}`);
 
             // Create the troop like normal
             const troopId = `troop_${socket.id}_${Date.now()}`;
@@ -532,7 +532,7 @@ io.on('connection', (socket) => {
             };
 
             player.troops.push(newTroop);
-            console.log(`Spawned pildoras troop:`, newTroop);
+          //  console.log(`Spawned pildoras troop:`, newTroop);
         } else if (troopType === 'flacidos') {
             // Create 3 troops instead of 1
             for (let i = 0; i < 3; i++) {
@@ -570,7 +570,7 @@ io.on('connection', (socket) => {
                 };
 
                 player.troops.push(newTroop);
-                console.log(`Spawned flacidos troop ${i+1}/3:`, newTroop);
+            //    console.log(`Spawned flacidos troop ${i+1}/3:`, newTroop);
             }
         } else if (troopType === 'lacaja') {
             // Create 3 random troops
@@ -620,7 +620,7 @@ io.on('connection', (socket) => {
                 };
 
                 player.troops.push(newTroop);
-                console.log(`Spawned random troop from lacaja ${i+1}/3:`, newTroop);
+             //   console.log(`Spawned random troop from lacaja ${i+1}/3:`, newTroop);
             }
         } else {
             // Original code for other troop types (spawns 1 troop)
@@ -655,7 +655,7 @@ io.on('connection', (socket) => {
             };
 
             player.troops.push(newTroop);
-            console.log(newTroop);
+           // console.log(newTroop);
         }
 
         const playedCardId = card.id;
@@ -669,7 +669,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log(`Player disconnected: ${socket.id}`);
+       // console.log(`Player disconnected: ${socket.id}`);
 
         const queueIndex = playerQueue.indexOf(socket.id);
         if (queueIndex !== -1) {
@@ -695,5 +695,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  //  console.log(`Server running on port ${PORT}`);
 });

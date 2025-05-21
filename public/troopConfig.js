@@ -197,7 +197,7 @@ const TROOP_CONFIG = {
     },
 
     // Game constants
-    CARD_ANIMATION_DURATION: 300, // ms
+    CARD_ANIMATION_DURATION: 50, // ms
     BASE_MAX_HEALTH: 100
 };
 
