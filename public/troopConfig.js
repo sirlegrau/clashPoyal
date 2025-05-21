@@ -22,11 +22,11 @@ const TROOP_CONFIG = {
         tank: {
             id: 'tank',
             nombre: 'poyón',
-            maxHealth: 45,
+            maxHealth: 55,
             health: 45,
             attack: 2,
             range: 40,
-            speed: 3,
+            speed: 2.5,
             attackSpeed: 1, // slower attack
             size: 190,
             coste: 8,
@@ -40,10 +40,10 @@ const TROOP_CONFIG = {
             nombre: 'salpicona',
             maxHealth: 7,
             health: 7,
-            attack: 3,
+            attack: 1.5,
             range: 225,
             speed: 4,
-            attackSpeed: 1,
+            attackSpeed: 2,
             size: 95,
             coste: 5,
             playerColor: '#3498db',
@@ -54,11 +54,11 @@ const TROOP_CONFIG = {
         berserker: {
             id: 'berserker',
             nombre: 'poya jinete',
-            maxHealth: 15,
+            maxHealth: 13,
             health: 15,
-            attack: 4,
+            attack: 2,
             range: 15,
-            speed: 15,      // fast
+            speed: 17,      // fast
             attackSpeed: 2,  // attacks faster
             size: 110,
             coste:4,
@@ -71,7 +71,7 @@ const TROOP_CONFIG = {
             id: 'knight',
             nombre: 'micropoya',
             maxHealth: 18,
-            health: 18,
+            health: 15,
             attack: 3,
             range: 35,
             speed: 5.5,
@@ -88,7 +88,7 @@ const TROOP_CONFIG = {
             nombre: 'poya hechizera',
             maxHealth: 5,
             health: 5,
-            attack: 12,
+            attack: 9,
             range: 275,
             speed: 3.5,
             attackSpeed: 0.66, // slower attack
@@ -121,8 +121,8 @@ const TROOP_CONFIG = {
             maxHealth: 25,
             health: 25,
             attack: 1,
-            range: 300,
-            speed: 0.166,
+            range: 285,
+            speed: 0.1,
             attackSpeed: 2.33,
             size: 120,
             coste:6,
@@ -158,7 +158,16 @@ const TROOP_CONFIG = {
             playerColor: '#f39c12',
             enemyColor: '#b9770e',
             attackColor: '#d35400',
-            description: 'lo que toman los machos alpha, +10 en virilidad'
+            description: 'lo que toman los machos alpha, +12 en virilidad'
+        },
+        bolsa: {
+            id: 'bolsa',
+            nombre: 'Bolsa de Cum',
+            coste:2,
+            playerColor: '#f39c12',
+            enemyColor: '#b9770e',
+            attackColor: '#d35400',
+            description: 'reutilizable'
         },
     },
 

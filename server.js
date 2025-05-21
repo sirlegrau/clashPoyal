@@ -31,7 +31,9 @@ const BASE_CARD_POOL = [
     { id: 'card8', troopType: 'flacidos', manaCost: 5 },
     { id: 'card9', troopType: 'lapiz', manaCost: 6 },
     { id: 'card10', troopType: 'lacaja', manaCost: 10 },
-    { id: 'card11', troopType: 'pildoras', manaCost: 4 }
+    { id: 'card11', troopType: 'pildoras', manaCost: 4 },
+    { id: 'card12', troopType: 'bolsa', manaCost: 2 }
+
 ];
 
 // Player-specific card pools
@@ -448,8 +450,49 @@ io.on('connection', (socket) => {
 
         const isFirstPlayer = socket.id === Object.keys(game.players)[0];
 
+        // Special handling for bolsa - add 3 mana to the player
+        if (troopType === 'bolsa') {
+            // Add 3 mana to the player, but don't exceed maxMana
+            player.mana = Math.min(player.maxMana, player.mana + 3);
+
+            console.log(`Player ${socket.id} received 3 mana from bolsa. New mana: ${player.mana}`);
+
+            // Create the troop like normal
+            const troopId = `troop_${socket.id}_${Date.now()}`;
+            const spawnPos = {
+                x: player.basePosition.x + (Math.random() * 300 - 40),
+                y: player.basePosition.y + (isFirstPlayer ? -50 : 50)
+            };
+
+            const baseTroopStats = troopConfig.getTroopConfigByTypeId(troopType);
+            const health = troopConfig.getScaledTroopStat(baseTroopStats.health, newLevel);
+            const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, newLevel);
+            const range = baseTroopStats.range;
+            const speed = troopConfig.getScaledTroopStat(baseTroopStats.speed, newLevel);
+            const attackSpeed = troopConfig.getScaledTroopStat(baseTroopStats.attackSpeed, newLevel);
+
+            const newTroop = {
+                id: troopId,
+                type: troopType,
+                level: newLevel,
+                position: spawnPos,
+                health: health,
+                maxHealth: health,
+                attack: attack,
+                range: range,
+                speed: speed,
+                attackSpeed: attackSpeed,
+                attacking: false,
+                lastAttackTime: 0,
+                currentTarget: null,
+                currentTargetType: null
+            };
+
+            player.troops.push(newTroop);
+            console.log(`Spawned bolsa troop:`, newTroop);
+        }
         // Special handling for pildoras - heal the base
-        if (troopType === 'pildoras') {
+        else if (troopType === 'pildoras') {
             // Get the pildoras stats to determine healing amount
             const baseTroopStats = troopConfig.getTroopConfigByTypeId(troopType);
             const attack = troopConfig.getScaledTroopStat(baseTroopStats.attack, newLevel);
@@ -532,7 +575,7 @@ io.on('connection', (socket) => {
         } else if (troopType === 'lacaja') {
             // Create 3 random troops
             const availableTroopTypes = BASE_CARD_POOL
-                .filter(card => card.troopType !== 'lacaja' && card.troopType !== 'shuffler' && card.troopType !== 'pildoras')
+                .filter(card => card.troopType !== 'lacaja' && card.troopType !== 'shuffler' && card.troopType !== 'pildoras' && card.troopType !== 'bolsa')
                 .map(card => card.troopType);
 
             for (let i = 0; i < 3; i++) {

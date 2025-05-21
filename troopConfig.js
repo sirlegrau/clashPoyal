@@ -83,10 +83,10 @@ const troopTypes = {
     // Tank - high health, low speed, medium damage
     tank: {
         id: 'tank',
-        health: 45,
+        health: 55,
         attack: 2,
         range: 40,
-        speed: 3,
+        speed: 2.5,
         attackSpeed: 1 // slower attack
     },
 
@@ -94,26 +94,26 @@ const troopTypes = {
     archer: {
         id: 'archer',
         health: 7,
-        attack: 3,
+        attack: 1.5,
         range: 225,
         speed: 4,
-        attackSpeed: 1
+        attackSpeed: 2
     },
 
     // Berserker - medium health, high attack, low range
     berserker: {
         id: 'berserker',
-        health: 15,
-        attack: 4,
+        health: 13,
+        attack: 2,
         range: 15,
-        speed: 15,      // fast
+        speed: 17,      // fast
         attackSpeed: 2  // attacks faster
     },
 
     // Knight - high health, high attack, medium range
     knight: {
         id: 'knight',
-        health: 18,
+        health: 15,
         attack: 3,
         range: 35,
         speed: 5.5,
@@ -124,7 +124,7 @@ const troopTypes = {
     mage: {
         id: 'mage',
         health: 5,
-        attack: 12,
+        attack: 9,
         range: 275,
         speed: 3.5,
         attackSpeed: 0.66 // slower attack
@@ -152,8 +152,8 @@ const troopTypes = {
         id: 'lapiz',
         health: 25,
         attack: 1,
-        range: 300,
-        speed: 0.166,
+        range: 285,
+        speed: 0.1,
         attackSpeed: 2.33 // slower attack
     },
     lacaja: {
@@ -167,7 +167,15 @@ const troopTypes = {
     pildoras: {
         id: 'pildoras',
         health: 0,
-        attack: 10,
+        attack: 12,
+        range: 0,
+        speed: 0,
+        attackSpeed: 0 // slower attack
+    },
+    bolsa: {
+        id: 'bolsa',
+        health: 0,
+        attack: 3,
         range: 0,
         speed: 0,
         attackSpeed: 0 // slower attack
@@ -186,7 +194,9 @@ const cardTroopMapping = {
     'card8': troopTypes.flacidos,
     'card9': troopTypes.lapiz,
     'card10': troopTypes.lacaja,
-    'card11': troopTypes.pildoras
+    'card11': troopTypes.pildoras,
+    'card12': troopTypes.bolsa
+
 };
 
 // Export configurations
