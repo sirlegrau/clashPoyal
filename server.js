@@ -211,7 +211,7 @@ function startGameLoop(gameId) {
                     if (decayElapsedTime >= 1000) {
                         // Calculate how many seconds have passed and reduce that much HP
                         const secondsPassed = Math.floor(decayElapsedTime / 1000);
-                        troop.health -= secondsPassed /2;
+                        troop.health -= troop.maxhealth/30;
                         troop.lastDecayTime = now - (decayElapsedTime % 1000); // Save remainder
                     }
                 }

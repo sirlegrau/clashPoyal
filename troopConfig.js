@@ -151,6 +151,7 @@ const troopTypes = {
     lapiz: {
         id: 'lapiz',
         health: 25,
+        maxhealth:25,
         attack: 1,
         range: 285,
         speed: 0.1,
